@@ -94,7 +94,7 @@ struct flags_to_regs toggles[] = {
 void
 usage(void) 
 {
-	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--shadowromoff|--shadowromon] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS]\n");
+	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--shadowromoff|--shadowromon] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS] [--memoryadd]\n");
 }
 
 uint8_t
