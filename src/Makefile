@@ -1,7 +1,7 @@
 #CC=cc
 CC=vc
 CFLAGS=
-LDFLAGS=
+LDFLAGS=-lamiga
 
 OBJECTS=9tcfg.o
 

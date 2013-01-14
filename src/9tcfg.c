@@ -9,6 +9,9 @@
 
 #include <getopt.h>
 
+#include <exec/types.h>
+#include <clib/exec_protos.h>
+
 #define DEBUG		1	/* print debug messages */
 /*#define FAKECARD	1*/	/* fake the card in memory as normal variable */
 
@@ -29,6 +32,9 @@
 #define CFG_R1_BANKBIT1		0x10	/* xxx1xxxx */
 
 #define MAPROM_BANK_ADDRESS	0xB80000
+
+#define ADDMEM_0_BASE		0xA80000
+#define ADDMEM_1_BASE		0xF00000
 
 /* -- data types and structs used in the program -- */
 
@@ -55,6 +61,8 @@ void cfgreg_write(uint8_t offset, uint8_t value);
 void cfgreg_set(uint8_t offset, uint8_t bits);
 void cfgreg_unset(uint8_t offset, uint8_t bits);
 void cfgreg_display(void);
+
+void memory_add(void);
 
 void flag_toggle(void);
 
@@ -265,6 +273,13 @@ bank_copy(uint32_t address)
 	memcpy((void*) address, (void*) MAPROM_BANK_ADDRESS, 256*1024);	
 }
 
+void
+memory_add(void)
+{
+	AddMemList(1*1024*1024, MEMF_FAST, 0, ADDMEM_0_BASE, "9T A8 RAM");
+	AddMemList(512*1024, MEMF_FAST, 0, ADDMEM_1_BASE, "9T F0 RAM");
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -273,6 +288,7 @@ main(int argc, char *argv[])
 	bool flag_maprombank = 0; uint8_t maprombank_number;
 	bool flag_customaddress = 0; uint32_t customaddress = 0;
 	bool flag_copytobank = 0; uint32_t copytobank_address = 0;
+	bool flag_memoryadd = 0;
 
 	extern char *optarg;
 	extern int optind;
@@ -293,10 +309,11 @@ main(int argc, char *argv[])
 		{ "maprombank",		required_argument, NULL, 'b' },
 		{ "customaddress",	required_argument, NULL, 'a' },
 		{ "copytobank",		required_argument, NULL, 'c' },
+		{ "memoryadd",		no_argument,	NULL, 'r' },
 		{ NULL,			0,		NULL,	0 }
 	};
 
-	while ((ch = getopt_long(argc, argv, "depPIiulMmSsbahc?:", longopts, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "depPIiulMmSsbahcr?:", longopts, NULL)) != -1) {
 		switch (ch) {
 		case 'b':
 			flag_maprombank = 1;
@@ -309,6 +326,10 @@ main(int argc, char *argv[])
 		case 'c':
 			flag_copytobank = 1;
 			copytobank_address = strtoul(optarg, NULL, 16); 
+			break;
+		case 'r':
+			flag_memoryadd = 1;
+			break;
 		case 0:
 			break;
 		case '?':
@@ -330,6 +351,9 @@ main(int argc, char *argv[])
 
 	if (flag_copytobank)
 		bank_copy(copytobank_address);
+
+	if (flag_memoryadd)
+		memory_add();
 
 	flag_toggle();
 
