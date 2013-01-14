@@ -9,7 +9,7 @@
 
 #include <getopt.h>
 
-#define CFG_ADDRESS		0xDE0000
+#define CFG_ADDRESS		0xBE0000
 #define CFG_R0_OFFSET		0
 #define CFG_R1_OFFSET		4
 
