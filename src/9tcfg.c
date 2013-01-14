@@ -48,6 +48,7 @@ struct flags_to_regs {
 
 void bank_select(uint8_t banknum);
 uint8_t bank_bits2num(uint8_t r1);
+void bank_copy(uint32_t address);
 
 uint8_t cfgreg_read(uint8_t offset);
 void cfgreg_write(uint8_t offset, uint8_t value);
@@ -57,7 +58,7 @@ void cfgreg_display(void);
 
 void flag_toggle(void);
 
-void usage(void) ;
+void usage(void);
 
 /* -- global variables -- */
 
