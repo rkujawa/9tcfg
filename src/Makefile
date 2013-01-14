@@ -1,3 +1,4 @@
+#CC=cc
 CC=vc
 CFLAGS=
 LDFLAGS=

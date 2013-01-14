@@ -9,6 +9,11 @@
 
 #include <getopt.h>
 
+#define DEBUG		1	/* print debug messages */
+/*#define FAKECARD	1*/	/* fake the card in memory as normal variable */
+
+/* -- hardware registers -- */
+
 #define CFG_ADDRESS		0xBE0000
 #define CFG_R0_OFFSET		0
 #define CFG_R1_OFFSET		4
@@ -23,8 +28,9 @@
 #define CFG_R1_BANKBIT0		0x20	/* xx1xxxxx */
 #define CFG_R1_BANKBIT1		0x10	/* xxx1xxxx */
 
-#define DEBUG		1	/* print debug messages */
-/*#define FAKECARD	1	 fake the card in memory as normal variable */
+#define MAPROM_BANK_ADDRESS	0xB80000
+
+/* -- data types and structs used in the program -- */
 
 #ifdef __VBCC__
 typedef uint8_t bool;
@@ -37,6 +43,23 @@ struct flags_to_regs {
 	uint8_t reg_offset;	/* offset to register */
 	uint8_t bit;		/* which bit to set/unset in this register */
 };
+
+/* -- function prototypes -- */
+
+void bank_select(uint8_t banknum);
+uint8_t bank_bits2num(uint8_t r1);
+
+uint8_t cfgreg_read(uint8_t offset);
+void cfgreg_write(uint8_t offset, uint8_t value);
+void cfgreg_set(uint8_t offset, uint8_t bits);
+void cfgreg_unset(uint8_t offset, uint8_t bits);
+void cfgreg_display(void);
+
+void flag_toggle(void);
+
+void usage(void) ;
+
+/* -- global variables -- */
 
 #ifdef FAKECARD
 uint64_t fakecardreg = 0x0;
@@ -56,11 +79,13 @@ struct flags_to_regs toggles[] = {
 	{ -1, -1, 0, 0, 0 } /* end */
 };
 
+/* -- implementation -- */
 
+/* display program usage information */
 void
 usage(void) 
 {
-	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--shadowromoff|--shadowromon] [--customaddress=0xADDRESS]\n");
+	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--shadowromoff|--shadowromon] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS]\n");
 }
 
 uint8_t
@@ -108,6 +133,16 @@ cfgreg_unset(uint8_t offset, uint8_t bits)
 	cfgreg_write(offset, v);
 }
 
+uint8_t
+bank_bits2num(uint8_t r1)
+{
+	uint8_t num;
+
+	num = ((r1 & CFG_R1_BANKBIT0) >> 5) | ((r1 & CFG_R1_BANKBIT1) >> 3);
+
+	return num;
+}
+
 void
 cfgreg_display(void) 
 {
@@ -146,13 +181,7 @@ cfgreg_display(void)
 	else
 		printf("disabled\n");
 
-	printf("\tShadow ROM: ");
-	if (r1 & CFG_R1_SHADOWROM)
-		printf("enabled\n");
-	else
-		printf("disabled\n");
-
-	printf("\tBank bits: ");
+	printf("\tMAPROM bank: %d (bits: ", bank_bits2num(r1));
 	if (r1 & CFG_R1_BANKBIT0)
 		printf("1");
 	else
@@ -161,7 +190,13 @@ cfgreg_display(void)
 		printf("1");
 	else
 		printf("0");
-	printf("\n");
+	printf(")\n");
+
+	printf("\tShadow ROM: ");
+	if (r1 & CFG_R1_SHADOWROM)
+		printf("enabled\n");
+	else
+		printf("disabled\n");
 
 }
 
@@ -198,6 +233,37 @@ flag_toggle(void)
 	}
 }
 
+void
+bank_select(uint8_t banknum)
+{
+#ifdef DEBUG
+	printf("DEBUG: changing to bank %d\n", banknum);
+#endif /* DEBUG */
+
+	/* XXX: this could be implemented with one set/unset operation */
+
+	if (banknum & 0x1)
+		cfgreg_set(CFG_R1_OFFSET, CFG_R1_BANKBIT0);
+	else
+		cfgreg_unset(CFG_R1_OFFSET, CFG_R1_BANKBIT0);
+
+	if (banknum & 0x2)
+		cfgreg_set(CFG_R1_OFFSET, CFG_R1_BANKBIT1);
+	else
+		cfgreg_unset(CFG_R1_OFFSET, CFG_R1_BANKBIT1);
+		
+}
+
+void
+bank_copy(uint32_t address)
+{
+#ifdef DEBUG
+	printf("DEBUG: copying 256kB block from %x to %x\n", address, MAPROM_BANK_ADDRESS);
+#endif /* DEBUG */
+
+	memcpy((void*) address, (void*) MAPROM_BANK_ADDRESS, 256*1024);	
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -205,6 +271,7 @@ main(int argc, char *argv[])
 
 	bool flag_maprombank = 0; uint8_t maprombank_number;
 	bool flag_customaddress = 0; uint32_t customaddress = 0;
+	bool flag_copytobank = 0; uint32_t copytobank_address = 0;
 
 	extern char *optarg;
 	extern int optind;
@@ -224,10 +291,11 @@ main(int argc, char *argv[])
 		{ "shadowromon",	no_argument,	&toggles[5].enable_flag,	's' },
 		{ "maprombank",		required_argument, NULL, 'b' },
 		{ "customaddress",	required_argument, NULL, 'a' },
+		{ "copytobank",		required_argument, NULL, 'c' },
 		{ NULL,			0,		NULL,	0 }
 	};
 
-	while ((ch = getopt_long(argc, argv, "depPIiulMmSsbah?:", longopts, NULL)) != -1) {
+	while ((ch = getopt_long(argc, argv, "depPIiulMmSsbahc?:", longopts, NULL)) != -1) {
 		switch (ch) {
 		case 'b':
 			flag_maprombank = 1;
@@ -235,14 +303,18 @@ main(int argc, char *argv[])
 			break;
 		case 'a':
 			flag_customaddress = 1;
-			customaddress = atoi(optarg); /* XXX: strtoul*/
+			customaddress = strtoul(optarg, NULL, 16);
 			break;
+		case 'c':
+			flag_copytobank = 1;
+			copytobank_address = strtoul(optarg, NULL, 16); 
 		case 0:
 			break;
 		case '?':
 		case 'h':
-		default:
+		default: /* means that some weird args were passed */
 			usage();
+			exit(1); /* exit in this case */
 		}
 
 	}
@@ -251,6 +323,12 @@ main(int argc, char *argv[])
 
 	if (flag_customaddress)
 		cardaddr = (void*) customaddress;
+
+	if (flag_maprombank)
+		bank_select(maprombank_number);
+
+	if (flag_copytobank)
+		bank_copy(copytobank_address);
 
 	flag_toggle();
 
