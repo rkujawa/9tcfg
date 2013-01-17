@@ -78,6 +78,7 @@ void *cardaddr = &fakecardreg;
 uint8_t *cardaddr = CFG_ADDRESS;
 #endif /* FAKECARD */
 
+/* simple on/off flags, this struct is meh */
 struct flags_to_regs toggles[] = {
 	{ 0, 0, 1, CFG_R0_OFFSET, CFG_R0_DISABLE }, /* enable/disable020 */
 	{ 0, 0, 0, CFG_R0_OFFSET, CFG_R0_PCMCIA },  /* pcmciamodeon/pcmciamodeoff */
@@ -264,13 +265,24 @@ bank_select(uint8_t banknum)
 }
 
 void
+memory_copy(uint8_t *to, uint8_t *from, size_t size)
+{
+	int i;
+
+	for (i = 0; i < size; i++) {
+		to[i] = from[i];
+	}	
+}
+
+void
 bank_copy(uint32_t address)
 {
 #ifdef DEBUG
 	printf("DEBUG: copying 256kB block from %x to %x\n", address, MAPROM_BANK_ADDRESS);
 #endif /* DEBUG */
 
-	memcpy((void*) address, (void*) MAPROM_BANK_ADDRESS, 256*1024);	
+	/*memcpy((void*) address, (void*) MAPROM_BANK_ADDRESS, 256*1024);	*/
+	memory_copy((uint8_t*) address, (uint8_t*) MAPROM_BANK_ADDRESS, 256*1024);	
 }
 
 void
