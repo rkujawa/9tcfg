@@ -264,7 +264,7 @@ bank_select(uint8_t banknum)
 		
 }
 
-void
+/*void
 memory_copy(uint8_t *to, uint8_t *from, size_t size)
 {
 	int i;
@@ -272,7 +272,7 @@ memory_copy(uint8_t *to, uint8_t *from, size_t size)
 	for (i = 0; i < size; i++) {
 		to[i] = from[i];
 	}	
-}
+}*/
 
 void
 bank_copy(uint32_t address)
@@ -281,8 +281,8 @@ bank_copy(uint32_t address)
 	printf("DEBUG: copying 256kB block from %x to %x\n", address, MAPROM_BANK_ADDRESS);
 #endif /* DEBUG */
 
-	/*memcpy((void*) address, (void*) MAPROM_BANK_ADDRESS, 256*1024);	*/
-	memory_copy((uint8_t*) address, (uint8_t*) MAPROM_BANK_ADDRESS, 256*1024);	
+	memcpy((void*) MAPROM_BANK_ADDRESS, (void*) address, 256*1024);	
+	/*memory_copy((uint8_t*) address, (uint8_t*) MAPROM_BANK_ADDRESS, 256*1024);	*/
 }
 
 void
