@@ -80,6 +80,8 @@ void usage(void);
 
 /* -- global variables -- */
 
+static const STRPTR version = "\0$VER: 9tcfg 0.1 (18.01.2013)";
+
 #ifdef FAKECARD
 uint64_t fakecardreg = 0x0;
 /*uint64_t fakecardreg = 0xFFFFFFFFFFFFFF; */
