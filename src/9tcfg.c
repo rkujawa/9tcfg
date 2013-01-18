@@ -6,11 +6,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 #endif
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #include <getopt.h>
 
 #include <exec/types.h>
-#include <clib/exec_protos.h>
+#include <exec/execbase.h>
+#include <proto/exec.h>
 
 #define DEBUG		1	/* print debug messages */
 /*#define FAKECARD	1*/	/* fake the card in memory as normal variable */
@@ -35,6 +39,7 @@
 
 #define ADDMEM_0_BASE		0xA80000
 #define ADDMEM_1_BASE		0xF00000
+#define ADDMEM_PRI		0
 
 /* -- data types and structs used in the program -- */
 
@@ -63,8 +68,13 @@ void cfgreg_unset(uint8_t offset, uint8_t bits);
 void cfgreg_display(void);
 
 void memory_add(void);
+bool memory_check_added(uint32_t address);
 
 void flag_toggle(void);
+
+char *file_load(char *path);
+void loadrom(void);
+void shadow_activate(void);
 
 void usage(void);
 
@@ -95,7 +105,7 @@ struct flags_to_regs toggles[] = {
 void
 usage(void) 
 {
-	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--shadowromoff|--shadowromon] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS] [--memoryadd]\n");
+	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--shadowromoff|--shadowromon] [--shadowromactivate] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS] [--memoryadd]\n");	
 }
 
 uint8_t
@@ -264,16 +274,6 @@ bank_select(uint8_t banknum)
 		
 }
 
-/*void
-memory_copy(uint8_t *to, uint8_t *from, size_t size)
-{
-	int i;
-
-	for (i = 0; i < size; i++) {
-		to[i] = from[i];
-	}	
-}*/
-
 void
 bank_copy(uint32_t address)
 {
@@ -282,14 +282,17 @@ bank_copy(uint32_t address)
 #endif /* DEBUG */
 
 	memcpy((void*) MAPROM_BANK_ADDRESS, (void*) address, 256*1024);	
-	/*memory_copy((uint8_t*) address, (uint8_t*) MAPROM_BANK_ADDRESS, 256*1024);	*/
 }
 
+/* add non-autoconfiguring memory to the system */
 void
 memory_add(void)
 {
-	AddMemList(1*1024*1024, MEMF_FAST, 0, ADDMEM_0_BASE, "9T A8 RAM");
-	AddMemList(512*1024, MEMF_FAST, 0, ADDMEM_1_BASE, "9T F0 RAM");
+	if (!memory_check_added(ADDMEM_0_BASE))
+		AddMemList(1*1024*1024, MEMF_FAST, ADDMEM_PRI, ADDMEM_0_BASE, "9T A8 RAM");
+
+	if (!memory_check_added(ADDMEM_1_BASE))
+		AddMemList(512*1024, MEMF_FAST, ADDMEM_PRI, ADDMEM_1_BASE, "9T F0 RAM");
 }
 
 int
@@ -297,10 +300,12 @@ main(int argc, char *argv[])
 {
 	int ch;
 
-	bool flag_maprombank = 0; uint8_t maprombank_number;
-	bool flag_customaddress = 0; uint32_t customaddress = 0;
-	bool flag_copytobank = 0; uint32_t copytobank_address = 0;
+	bool flag_maprombank = 0;	uint8_t maprombank_number;
+	bool flag_customaddress = 0;	uint32_t customaddress = 0;
+	bool flag_copytobank = 0;	uint32_t copytobank_address = 0;
+	bool flag_loadrom = 0;		char loadrom_path[256];
 	bool flag_memoryadd = 0;
+	bool flag_shadowromactivate = 0;
 
 	extern char *optarg;
 	extern int optind;
@@ -318,9 +323,11 @@ main(int argc, char *argv[])
 		{ "mapromon",		no_argument,	&toggles[4].enable_flag,	'm' },
 		{ "shadowromoff",	no_argument,	&toggles[5].disable_flag,	'S' },
 		{ "shadowromon",	no_argument,	&toggles[5].enable_flag,	's' },
+		{ "shadowromactivate",	no_argument,	NULL, 'o' },	
 		{ "maprombank",		required_argument, NULL, 'b' },
 		{ "customaddress",	required_argument, NULL, 'a' },
 		{ "copytobank",		required_argument, NULL, 'c' },
+		{ "loadrom",		required_argument, NULL, 'f' },
 		{ "memoryadd",		no_argument,	NULL, 'r' },
 		{ NULL,			0,		NULL,	0 }
 	};
@@ -342,13 +349,20 @@ main(int argc, char *argv[])
 		case 'r':
 			flag_memoryadd = 1;
 			break;
+		case 'o':
+			flag_shadowromactivate = 1;
+			break;
+		case 'f':
+			flag_loadrom = 1;
+			strncpy(loadrom_path, optarg, 256);
+			break;
 		case 0:
 			break;
 		case '?':
 		case 'h':
 		default: /* means that some weird args were passed */
 			usage();
-			exit(1); /* exit in this case */
+			exit(EXIT_FAILURE); /* exit in this case */
 		}
 
 	}
@@ -367,8 +381,92 @@ main(int argc, char *argv[])
 	if (flag_memoryadd)
 		memory_add();
 
+	if (flag_loadrom)
+		loadrom();
+
+	if (flag_shadowromactivate)
+		shadow_activate();
+
 	flag_toggle();
 
 	cfgreg_display();
 }
 
+/* activate shadow rom functionality */
+void
+shadow_activate(void)
+{
+	int i;
+	uint8_t r0, r1;
+
+	r1 = cfgreg_read(CFG_R1_OFFSET);
+
+	if (r1 & CFG_R1_MAPROM) {
+		printf("Cannot enable Shadow ROM if MAPROM enabled!\n");
+		exit(EXIT_FAILURE);
+	}
+	
+	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
+
+	bank_select(0);
+	bank_copy(0xE00000);
+	bank_select(1);
+	bank_copy(0xE40000);
+	bank_select(2);
+	bank_copy(0xF80000);
+	bank_select(3);
+	bank_copy(0xFC0000);
+
+	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
+	cfgreg_set(CFG_R1_OFFSET, CFG_R1_SHADOWROM); 
+	
+}
+
+/* check if memory at given address is already added to system memory list */
+bool
+memory_check_added(uint32_t address)
+{
+	struct MemHeader *m, *nm;
+
+	for (m  = (void *) SysBase->MemList.lh_Head;
+	    nm = (void *) m->mh_Node.ln_Succ; m = nm) {
+		if (address == (uint32_t) m->mh_Lower) {
+			printf("DEBUG: memory at address %lx already added\n");
+			return 1;
+		}
+	}
+	return 0;
+}
+
+/* load file to memory */
+char *
+file_load(char *path)
+{
+	int fd;
+	struct stat statbuf;
+	char *filebuf;
+
+	if ((fd = open(path, O_RDONLY)) == -1)  {	
+		perror("Error openinig file");
+		return NULL;
+	}
+
+	fstat(fd, &statbuf);
+
+	filebuf = (char*) malloc(statbuf.st_size);
+
+	printf("DEBUG: loading %ld bytes long file at %p\n", (long) statbuf.st_size, filebuf);
+
+	if (read(fd, filebuf, statbuf.st_size) == -1) {
+		perror("Error reading file");
+		return NULL;
+	}
+
+	return filebuf;
+}
+
+void
+loadrom(void)
+{
+	printf("loadrom TODO\n");
+}
