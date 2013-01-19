@@ -1,18 +1,28 @@
-#CC=cc
 CC=vc
+RMRF=rm
+GROFF=groff
+
 CFLAGS=
 LDFLAGS=-lamiga -lposix
 
 OBJECTS=9tcfg.o
+MANPAGE=9tcfg.1
 
-all: 9tcfg 
+EXECUTABLE=9tcfg
+MANPAGEPS=9tcfg.ps
+
+all: $(EXECUTABLE) 
+man: $(MANPAGEPS) 
+
+$(MANPAGEPS) : $(MANPAGE) 
+	$(GROFF) -Tps -mandoc -c $< > $(MANPAGEPS) 
 
 9tcfg : $(OBJECTS)
-	$(CC) -o 9tcfg $(LDFLAGS) $(OBJECTS)
+	$(CC) -o $(EXECUTABLE) $(LDFLAGS) $(OBJECTS)
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $<
 
 clean :
-	rm -rf $(OBJECTS) 9tcfg 
+	$(RM) -rf $(OBJECTS) $(EXECUTABLE) $(MANPAGEPS) 
 

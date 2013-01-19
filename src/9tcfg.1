@@ -1,0 +1,69 @@
+.\" Copyright (c) 2013 Radoslaw Kujawa. All Rights Reserved.
+.Dd January 19, 2013
+.Dt 9TCFG 
+.Os "Ninetails"
+.Sh NAME
+.Nm 9tcfg 
+.Nd Ninetails accelerator configuration program 
+.Sh SYNOPSIS
+.Nm
+.Op Fl -disable020 | -enable020
+.Op Fl -instcacheoff | -instcacheon 
+.Op Fl -pcmciamodeoff | -pcmciamodeon
+.Op Fl -writelockoff | -writelockon
+.Op Fl -mapromoff | -mapromon
+.Op Fl -mapromload Ar <kick.rom>
+.Op Fl -shadowromoff | -shadowromon 
+.Op Fl -shadowromactivate
+.\" .Op Fl -customaddress Ar <0xADDRESS> 
+.\" .Op Fl -copytobank Ar <0xADDRESS> 
+.Op Fl -memoryadd
+.Op Fl -reboot
+.Sh DESCRIPTION
+The 
+.Nm
+command can be used to manage additional functions of Ninetails accelerator board.
+The
+.Nm
+command takes the following flags and arguments:
+.Bl -tag -width
+.It Fl -disable020
+Disable the 68020 processor after next reboot.
+.It Fl -enable020
+Enable the 68020 processor after next reboot (default).
+.It Fl -instcacheoff
+Turn off instruction cache.
+.It Fl -instcacheon
+Turn on instruction cache (default).
+.It Fl -pcmciamodeoff
+Disable the PCMCIA mode (default).
+XXX: what does it really do? does it need reboot?
+.It Fl -pcmciamodeon
+Enable the PCMCIA mode.
+XXX: as above
+.It Fl -writelockoff 
+Unprotect the 0xB80000 - 0xBC0000 bank area.
+.It Fl -writelockon
+Protect the 0xB80000 - 0xBC0000 bank area (default).
+.It Fl -mapromoff
+Turn off MAPROM after next reboot (default).
+.It Fl -mapromon
+Turn on MAPROM after next reboot.
+.It Fl -mapromload Ar <kick.rom>
+Load ROM for use with MAPROM. Should be used with
+.Fl -mapromon
+switch.
+.It Fl -shadowromoff
+Disable Shadow ROM function after next reboot (default).
+.It Fl -shadowromon
+Enable Shadow ROM function after next reboot.
+.It Fl -shadowromactivate
+Copy the Kickstart image from ROM chip into bank area.
+.It Fl -memoryadd 
+Add 1,5MB of non-autoconfiguring Fast RAM to operating system memory list.
+.It Fl -reboot
+Reboot the Amiga after setting requrested options.
+.El
+.Sh AUTHORS
+Ninetails board was designed and produced by Rafal Chyla.
+9tcfg was written by Radoslaw "strim" Kujawa.
