@@ -17,7 +17,6 @@
 #include <proto/exec.h>
 
 #define DEBUG		1	/* print debug messages */
-/*#define FAKECARD	1*/	/* fake the card in memory as normal variable */
 
 /* -- hardware registers -- */
 
@@ -82,13 +81,8 @@ void usage(void);
 
 static const STRPTR version = "\0$VER: 9tcfg 0.1 (18.01.2013)";
 
-#ifdef FAKECARD
-uint64_t fakecardreg = 0x0;
-/*uint64_t fakecardreg = 0xFFFFFFFFFFFFFF; */
-void *cardaddr = &fakecardreg;  
-#else
+/* pointer to base address of the card */
 uint8_t *cardaddr = CFG_ADDRESS;
-#endif /* FAKECARD */
 
 /* simple on/off flags, this struct is meh */
 struct flags_to_regs toggles[] = {
@@ -110,6 +104,7 @@ usage(void)
 	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--shadowromoff|--shadowromon] [--shadowromactivate] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS] [--memoryadd]\n");	
 }
 
+/* read register at offset */
 uint8_t
 cfgreg_read(uint8_t offset) 
 {
@@ -125,6 +120,7 @@ cfgreg_read(uint8_t offset)
 	return v;
 }
 
+/* write register at offset */
 void
 cfgreg_write(uint8_t offset, uint8_t value)
 {
@@ -137,6 +133,7 @@ cfgreg_write(uint8_t offset, uint8_t value)
 	*ptr = value;
 }
 
+/* set bit in register at offset */
 void
 cfgreg_set(uint8_t offset, uint8_t bits)
 {
@@ -146,6 +143,7 @@ cfgreg_set(uint8_t offset, uint8_t bits)
 	cfgreg_write(offset, v);
 }
 
+/* unset bit in register at offset */
 void
 cfgreg_unset(uint8_t offset, uint8_t bits)
 {
@@ -155,6 +153,7 @@ cfgreg_unset(uint8_t offset, uint8_t bits)
 	cfgreg_write(offset, v);
 }
 
+/* convert bank bits into bank number */
 uint8_t
 bank_bits2num(uint8_t r1)
 {
@@ -165,6 +164,7 @@ bank_bits2num(uint8_t r1)
 	return num;
 }
 
+/* read and display configuration registers */
 void
 cfgreg_display(void) 
 {
@@ -255,6 +255,7 @@ flag_toggle(void)
 	}
 }
 
+/* switch bank */
 void
 bank_select(uint8_t banknum)
 {
@@ -276,6 +277,7 @@ bank_select(uint8_t banknum)
 		
 }
 
+/* copy memory to bank */
 void
 bank_copy(uint32_t address)
 {
