@@ -23,16 +23,20 @@
 #define CFG_ADDRESS		0xBE0000
 #define CFG_R0_OFFSET		0
 #define CFG_R1_OFFSET		4
+#define CFG_R2_OFFSET		8
 
-#define CFG_R0_DISABLE		0x80	/* 1xxxxxxx */
-#define CFG_R0_PCMCIA		0x40	/* x1xxxxxx */
-#define CFG_R0_CACHEOFF		0x20	/* xx1xxxxx */
-#define CFG_R0_WRITELOCKOFF	0x10	/* xxx1xxxx */
+#define CFG_R0_DISABLE		0x80	/* 1xxxxxxx - disable 68020 at next reset */
+#define CFG_R0_PCMCIA		0x40	/* x1xxxxxx - PCMCIA mode */
+#define CFG_R0_CACHEOFF		0x20	/* xx1xxxxx - instruction cache off */
+#define CFG_R0_WRITELOCKOFF	0x10	/* xxx1xxxx - disable write lock to banks */
 
-#define CFG_R1_MAPROM		0x80	/* 1xxxxxxx */
-#define CFG_R1_SHADOWROM	0x40	/* x1xxxxxx */
+#define CFG_R1_MAPROM		0x80	/* 1xxxxxxx - MAPROM at next reset */
+#define CFG_R1_SHADOWROM	0x40	/* x1xxxxxx - Shadow ROM */
 #define CFG_R1_BANKBIT0		0x20	/* xx1xxxxx */
 #define CFG_R1_BANKBIT1		0x10	/* xxx1xxxx */
+
+#define CFG_R2_68KMODE		0x80	/* 1xxxxxxx - current 68k mode */
+#define CFG_R2_MAPROM_STATUS	0x40	/* x1xxxxxx - current MAPROM mode */
 
 #define MAPROM_BANK_ADDRESS	0xB80000
 
@@ -71,15 +75,17 @@ bool memory_check_added(uint32_t address);
 
 void flag_toggle(void);
 
-char *file_load(char *path);
-void loadrom(void);
+size_t file_load(char *path, char *filebuf);
+void loadrom(char *path);
 void shadow_activate(void);
+
+void reboot(void);
 
 void usage(void);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.1 (18.01.2013)";
+static const STRPTR version = "\0$VER: 9tcfg 0.1.1 (19.01.2013)";
 
 /* pointer to base address of the card */
 uint8_t *cardaddr = CFG_ADDRESS;
@@ -101,7 +107,7 @@ struct flags_to_regs toggles[] = {
 void
 usage(void) 
 {
-	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--shadowromoff|--shadowromon] [--shadowromactivate] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS] [--memoryadd]\n");	
+	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--mapromload=file.rom] [--shadowromoff|--shadowromon] [--shadowromactivate] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS] [--memoryadd] [--reboot]\n");	
 }
 
 /* read register at offset */
@@ -168,10 +174,11 @@ bank_bits2num(uint8_t r1)
 void
 cfgreg_display(void) 
 {
-	uint8_t r0, r1;
+	uint8_t r0, r1, r2;
 
 	r0 = cfgreg_read(CFG_R0_OFFSET);
 	r1 = cfgreg_read(CFG_R1_OFFSET);
+	r2 = cfgreg_read(CFG_R2_OFFSET);
 
 	printf("\t68020: ");
 	if (r0 & CFG_R0_DISABLE)
@@ -216,6 +223,18 @@ cfgreg_display(void)
 
 	printf("\tShadow ROM: ");
 	if (r1 & CFG_R1_SHADOWROM)
+		printf("enabled\n");
+	else
+		printf("disabled\n");
+
+	printf("\t68000 mode: ");
+	if (r2 & CFG_R2_68KMODE)
+		printf("enabled\n");
+	else
+		printf("disabled\n");
+
+	printf("\tCurrent MAPROM state: ");
+	if (r2 & CFG_R2_MAPROM_STATUS)
 		printf("enabled\n");
 	else
 		printf("disabled\n");
@@ -310,6 +329,7 @@ main(int argc, char *argv[])
 	bool flag_loadrom = 0;		char loadrom_path[256];
 	bool flag_memoryadd = 0;
 	bool flag_shadowromactivate = 0;
+	bool flag_reboot = 0;
 
 	extern char *optarg;
 	extern int optind;
@@ -331,8 +351,9 @@ main(int argc, char *argv[])
 		{ "maprombank",		required_argument, NULL, 'b' },
 		{ "customaddress",	required_argument, NULL, 'a' },
 		{ "copytobank",		required_argument, NULL, 'c' },
-		{ "loadrom",		required_argument, NULL, 'f' },
+		{ "mapromload",		required_argument, NULL, 'f' },
 		{ "memoryadd",		no_argument,	NULL, 'r' },
+		{ "reboot",		no_argument,	NULL, 'R' },
 		{ NULL,			0,		NULL,	0 }
 	};
 
@@ -352,6 +373,9 @@ main(int argc, char *argv[])
 			break;
 		case 'r':
 			flag_memoryadd = 1;
+			break;
+		case 'R':
+			flag_reboot = 1;
 			break;
 		case 'o':
 			flag_shadowromactivate = 1;
@@ -386,7 +410,7 @@ main(int argc, char *argv[])
 		memory_add();
 
 	if (flag_loadrom)
-		loadrom();
+		loadrom(loadrom_path);
 
 	if (flag_shadowromactivate)
 		shadow_activate();
@@ -394,6 +418,9 @@ main(int argc, char *argv[])
 	flag_toggle();
 
 	cfgreg_display();
+
+	if (flag_reboot)
+		reboot();
 }
 
 /* activate shadow rom functionality */
@@ -401,13 +428,14 @@ void
 shadow_activate(void)
 {
 	int i;
-	uint8_t r0, r1;
+	uint8_t r1, r2;
 
 	r1 = cfgreg_read(CFG_R1_OFFSET);
+	r2 = cfgreg_read(CFG_R2_OFFSET);
 
-	if (r1 & CFG_R1_MAPROM) {
-		printf("Cannot enable Shadow ROM if MAPROM enabled!\n");
-		exit(EXIT_FAILURE);
+	if ( (r1 & CFG_R1_MAPROM) || (r2 & CFG_R2_MAPROM_STATUS)) {
+		printf("Cannot enable Shadow ROM if MAPROM enabled or currently active!\n");
+		return;
 	}
 	
 	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
@@ -444,17 +472,17 @@ memory_check_added(uint32_t address)
 	return 0;
 }
 
-/* load file to memory */
-char *
-file_load(char *path)
+/* load file to memory buffer */
+size_t
+file_load(char *path, char *filebuf)
 {
 	int fd;
 	struct stat statbuf;
-	char *filebuf;
+	size_t filesize;
 
 	if ((fd = open(path, O_RDONLY)) == -1)  {	
 		perror("Error openinig file");
-		return NULL;
+		return 0;
 	}
 
 	fstat(fd, &statbuf);
@@ -466,14 +494,89 @@ file_load(char *path)
 
 	if (read(fd, filebuf, statbuf.st_size) == -1) {
 		perror("Error reading file");
-		return NULL;
+		return 0;
 	}
 
-	return filebuf;
+	filesize = statbuf.st_size;
+
+	return filesize;
 }
 
 void
-loadrom(void)
+loadrom(char *path)
 {
-	printf("loadrom TODO\n");
+	char *rombuf;
+	size_t romsize;
+	uint8_t r1, r2;
+
+	r1 = cfgreg_read(CFG_R1_OFFSET);
+	r2 = cfgreg_read(CFG_R2_OFFSET);
+
+	/* do some sanity checks first */	
+	if (r1 & CFG_R1_SHADOWROM) {
+		printf("Cannot use MAPROM if Shadow ROM enabled. Please disable Shadow ROM and reboot first!\n");
+		return;
+	}
+
+	if (r2 & CFG_R2_MAPROM_STATUS) {
+		printf("Cannot load new ROM if MAPROM currently active. Please disable MAPROM and reboot first!\n");
+		return;
+	}
+
+#ifdef DEBUG
+	printf("DEBUG: will load ROM from %s\n", path);
+#endif /* DEBUG */
+
+	romsize = file_load(path, rombuf);
+
+#ifdef DEBUG
+	printf("DEBUG: m'kay so apparanetly loaded ROM has size: %x\n", (unsigned int) romsize);
+#endif /* DEBUG */
+
+	switch (romsize) {
+	case 262144:
+		bank_select(0);
+		bank_copy((uint32_t) rombuf);
+		bank_select(1);
+		bank_copy((uint32_t) rombuf);
+		bank_select(2);
+		bank_copy((uint32_t) rombuf);
+		bank_select(3);
+		bank_copy((uint32_t) rombuf);
+		break;
+	case 524288:
+		bank_select(0);
+		bank_copy((uint32_t) rombuf);
+		bank_select(1);
+		bank_copy((uint32_t) rombuf + 256*1024);
+		bank_select(2);
+		bank_copy((uint32_t) rombuf);
+		bank_select(3);
+		bank_copy((uint32_t) rombuf + 256*1024);
+		break;
+	case 1048576:
+		bank_select(0);
+		bank_copy((uint32_t) rombuf);
+		bank_select(1);
+		bank_copy((uint32_t) rombuf + 256*1024);
+		bank_select(2);
+		bank_copy((uint32_t) rombuf + 512*1024);
+		bank_select(3);
+		bank_copy((uint32_t) rombuf + 768*1024);
+		break;
+	default:
+		printf("Unsupported ROM size %x\n, ROM must be exactly 256kB, 512kB or 1MB\n", (unsigned int) romsize);
+		break;
+	}
+
+	printf("Your Amiga should be restarted now...\n");
 }
+
+/* reboot the machine */
+void
+reboot(void)
+{
+	/* for now let's just call Exec's ColdReboot()... */
+	ColdReboot();
+}
+
