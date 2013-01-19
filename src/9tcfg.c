@@ -119,7 +119,7 @@ cfgreg_read(uint8_t offset)
 	ptr = cardaddr + offset;
 	v = *ptr;
 #ifdef DEBUG
-	printf("DEBUG: read %x from %p\n", v, ptr);
+	printf("DEBUG: read %x from %p\n", (int) v, (void*) ptr);
 #endif /* DEBUG */
 
 	return v;
@@ -132,7 +132,7 @@ cfgreg_write(uint8_t offset, uint8_t value)
 
 	ptr = cardaddr + offset;
 #ifdef DEBUG
-	printf("DEBUG: write %x to %p\n", value, ptr);
+	printf("DEBUG: write %x to %p\n", (int) value, (void*) ptr);
 #endif /* DEBUG */
 	*ptr = value;
 }
@@ -203,7 +203,7 @@ cfgreg_display(void)
 	else
 		printf("disabled\n");
 
-	printf("\tMAPROM bank: %d (bits: ", bank_bits2num(r1));
+	printf("\tMAPROM bank: %d (bits: ", (int) bank_bits2num(r1));
 	if (r1 & CFG_R1_BANKBIT0)
 		printf("1");
 	else
@@ -259,7 +259,7 @@ void
 bank_select(uint8_t banknum)
 {
 #ifdef DEBUG
-	printf("DEBUG: changing to bank %d\n", banknum);
+	printf("DEBUG: changing to bank %d\n", (int) banknum);
 #endif /* DEBUG */
 
 	/* XXX: this could be implemented with one set/unset operation */
@@ -433,7 +433,9 @@ memory_check_added(uint32_t address)
 	for (m  = (void *) SysBase->MemList.lh_Head;
 	    nm = (void *) m->mh_Node.ln_Succ; m = nm) {
 		if (address == (uint32_t) m->mh_Lower) {
-			printf("DEBUG: memory at address %lx already added\n");
+#ifdef DEBUG
+			printf("DEBUG: memory at address %p already added\n", (void*) address);
+#endif /* DEBUG */
 			return 1;
 		}
 	}
@@ -456,8 +458,9 @@ file_load(char *path)
 	fstat(fd, &statbuf);
 
 	filebuf = (char*) malloc(statbuf.st_size);
-
-	printf("DEBUG: loading %ld bytes long file at %p\n", (long) statbuf.st_size, filebuf);
+#ifdef DEBUG
+	printf("DEBUG: loading %ld bytes long file at %p\n", (long) statbuf.st_size, (void*) filebuf);
+#endif /* DEBUG */
 
 	if (read(fd, filebuf, statbuf.st_size) == -1) {
 		perror("Error reading file");
