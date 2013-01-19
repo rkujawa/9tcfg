@@ -434,7 +434,7 @@ memory_check_added(uint32_t address)
 
 	for (m  = (void *) SysBase->MemList.lh_Head;
 	    nm = (void *) m->mh_Node.ln_Succ; m = nm) {
-		if (address == (uint32_t) m->mh_Lower) {
+		if (address == ( (uint32_t) m->mh_Lower & 0xFFFF00)) {
 #ifdef DEBUG
 			printf("DEBUG: memory at address %p already added\n", (void*) address);
 #endif /* DEBUG */

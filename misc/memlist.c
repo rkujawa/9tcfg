@@ -12,7 +12,7 @@ main(void)
 
 	for (m  = (void *) SysBase->MemList.lh_Head;
 	    nm = (void *) m->mh_Node.ln_Succ; m = nm) {
-		printf("%p to %p", (void*) m->mh_Lower, (void*) m->mh_Upper);
+		printf("%p to %p\n", (void*) m->mh_Lower, (void*) m->mh_Upper);
 	}
 
 	return 0;
