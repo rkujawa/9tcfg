@@ -533,6 +533,7 @@ loadrom(char *path)
 	printf("DEBUG: m'kay so apparanetly loaded ROM has size: %x\n", (unsigned int) romsize);
 #endif /* DEBUG */
 
+	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
 	switch (romsize) {
 	case 262144:
 		bank_select(0);
@@ -566,8 +567,15 @@ loadrom(char *path)
 		break;
 	default:
 		printf("Unsupported ROM size %x\n, ROM must be exactly 256kB, 512kB or 1MB\n", (unsigned int) romsize);
+		/* bail out */
+		free(rombuf);
+		cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
+		return;
 		break;
 	}
+
+	free(rombuf);
+	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
 
 	printf("Your Amiga should be restarted now...\n");
 }
