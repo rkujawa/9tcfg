@@ -13,3 +13,4 @@ Build requirements:
 
 Run-time requirements:
 - Ninetails board installed 
+- AmigaOS 2.x or newer
