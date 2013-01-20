@@ -78,6 +78,7 @@ void flag_toggle(void);
 size_t file_load(char *path, char *filebuf);
 void loadrom(char *path);
 void shadow_activate(void);
+void shadow_activate_self(void);
 
 void reboot(void);
 
@@ -107,7 +108,7 @@ struct flags_to_regs toggles[] = {
 void
 usage(void) 
 {
-	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--mapromload=file.rom] [--shadowromoff|--shadowromon] [--shadowromactivate] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS] [--memoryadd] [--reboot]\n");	
+	printf("usage: 9tcfg [--disable020|--enable020] [--instcacheoff|--instcacheon] [--pcmciamodeoff|--pcmciamodeon] [--writelockoff|--writelockon] [--mapromoff|--mapromon] [--mapromload=file.rom] [--shadowromoff|--shadowromon] [--shadowromactivate|--shadowromactivateself] [--customaddress=0xADDRESS] [--copytobank=0xADDRESS] [--memoryadd] [--reboot]\n");	
 }
 
 /* read register at offset */
@@ -329,6 +330,7 @@ main(int argc, char *argv[])
 	bool flag_loadrom = 0;		char loadrom_path[256];
 	bool flag_memoryadd = 0;
 	bool flag_shadowromactivate = 0;
+	bool flag_shadowromactivateself = 0;
 	bool flag_reboot = 0;
 
 	extern char *optarg;
@@ -348,6 +350,7 @@ main(int argc, char *argv[])
 		{ "shadowromoff",	no_argument,	&toggles[5].disable_flag,	'S' },
 		{ "shadowromon",	no_argument,	&toggles[5].enable_flag,	's' },
 		{ "shadowromactivate",	no_argument,	NULL, 'o' },	
+		{ "shadowromactivateself",no_argument,	NULL, 'O' },	
 		{ "maprombank",		required_argument, NULL, 'b' },
 		{ "customaddress",	required_argument, NULL, 'a' },
 		{ "copytobank",		required_argument, NULL, 'c' },
@@ -379,6 +382,9 @@ main(int argc, char *argv[])
 			break;
 		case 'o':
 			flag_shadowromactivate = 1;
+			break;
+		case 'O':
+			flag_shadowromactivateself = 1;
 			break;
 		case 'f':
 			flag_loadrom = 1;
@@ -412,6 +418,9 @@ main(int argc, char *argv[])
 	if (flag_loadrom)
 		loadrom(loadrom_path);
 
+	if (flag_shadowromactivateself)
+		shadow_activate_self();
+
 	if (flag_shadowromactivate)
 		shadow_activate();
 
@@ -421,6 +430,30 @@ main(int argc, char *argv[])
 
 	if (flag_reboot)
 		reboot();
+}
+
+/* copy rom over itself */
+void
+shadow_activate_self(void)
+{
+	
+	uint8_t r1, r2;
+
+	r1 = cfgreg_read(CFG_R1_OFFSET);
+	r2 = cfgreg_read(CFG_R2_OFFSET);
+
+	if ( (r1 & CFG_R1_MAPROM) || (r2 & CFG_R2_MAPROM_STATUS)) {
+		printf("Cannot enable Shadow ROM if MAPROM enabled or currently active!\n");
+		return;
+	}
+
+	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
+
+	memcpy((void*) 0xE00000, (void*) 0xE00000, 512*1024);	
+	memcpy((void*) 0xF80000, (void*) 0xF80000, 512*1024);	
+
+	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
+	cfgreg_set(CFG_R1_OFFSET, CFG_R1_SHADOWROM); 
 }
 
 /* activate shadow rom functionality */
