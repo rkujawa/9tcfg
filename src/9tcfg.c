@@ -601,13 +601,13 @@ loadrom(char *path)
 	default:
 		printf("Unsupported ROM size %x\n, ROM must be exactly 256kB, 512kB or 1MB\n", (unsigned int) romsize);
 		/* bail out */
-		free(rombuf);
+		/*free(rombuf);*/
 		cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
 		return;
 		break;
 	}
 
-	free(rombuf);
+	/*free(rombuf);*/
 	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
 
 	printf("Your Amiga should be restarted now...\n");
@@ -617,6 +617,9 @@ loadrom(char *path)
 void
 reboot(void)
 {
+	/* think about opening graphics.library, 
+	   then LoadView(); 2x WaitTOF(); to work around V39 bug */
+
 	/* for now let's just call Exec's ColdReboot()... */
 	ColdReboot();
 }
