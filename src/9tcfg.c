@@ -75,7 +75,9 @@ bool memory_check_added(uint32_t address);
 
 void flag_toggle(void);
 
-size_t file_load(char *path, char *filebuf);
+size_t file_size(char *path);
+bool file_load(char *path, char *filebuf, size_t filesize);
+
 void loadrom(char *path);
 void shadow_activate(void);
 void shadow_activate_self(void);
@@ -505,13 +507,13 @@ memory_check_added(uint32_t address)
 	return 0;
 }
 
-/* load file to memory buffer */
+/* get file size */
 size_t
-file_load(char *path, char *filebuf)
+file_size(char *path)
 {
 	int fd;
-	struct stat statbuf;
 	size_t filesize;
+	struct stat statbuf;
 
 	if ((fd = open(path, O_RDONLY)) == -1)  {	
 		perror("Error openinig file");
@@ -519,20 +521,36 @@ file_load(char *path, char *filebuf)
 	}
 
 	fstat(fd, &statbuf);
+	filesize = statbuf.st_size;
 
-	filebuf = (char*) malloc(statbuf.st_size);
+	close(fd);
+
+	return filesize;
+}
+
+/* load file to memory buffer */
+bool
+file_load(char *path, char *filebuf, size_t filesize)
+{
+	int fd;
+
+	if ((fd = open(path, O_RDONLY)) == -1)  {	
+		perror("Error openinig file");
+		return 0;
+	}
+
 #ifdef DEBUG
-	printf("DEBUG: loading %ld bytes long file at %p\n", (long) statbuf.st_size, (void*) filebuf);
+	printf("DEBUG: loading %x bytes long file at %p\n", (unsigned int) filesize, (void*) filebuf);
 #endif /* DEBUG */
 
-	if (read(fd, filebuf, statbuf.st_size) == -1) {
+	if (read(fd, filebuf, filesize) == -1) {
 		perror("Error reading file");
 		return 0;
 	}
 
-	filesize = statbuf.st_size;
+	close(fd);
 
-	return filesize;
+	return 1;
 }
 
 void
@@ -560,11 +578,19 @@ loadrom(char *path)
 	printf("DEBUG: will load ROM from %s\n", path);
 #endif /* DEBUG */
 
-	romsize = file_load(path, rombuf);
+	romsize = file_size(path);
 
 #ifdef DEBUG
 	printf("DEBUG: m'kay so apparanetly loaded ROM has size: %x\n", (unsigned int) romsize);
 #endif /* DEBUG */
+
+	rombuf = (char*) malloc(romsize);
+
+#ifdef DEBUG
+	printf("DEBUG: allocated %x bytes at address %p, ready to load data\n", (unsigned int) romsize, (void*) rombuf);
+#endif /* DEBUG */
+
+	file_load(path, rombuf, romsize);
 
 	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
 	switch (romsize) {
