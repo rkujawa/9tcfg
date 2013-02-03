@@ -6,7 +6,7 @@ Configuration program for Rafal Chyla's Ninetails A600 accelerator.
 Build requirements:
 - VBCC compiler
 - VBCC AmigaOS target
-- VBCC PosixLib
+- VBCC PosixLib (recompiled for 68000)
 - AmigaOS 3.9 NDK (should work with earlier too)
 - GNU make
 - GeekGadges on AmigaOS or UNIX-like operating system
@@ -14,3 +14,4 @@ Build requirements:
 Run-time requirements:
 - Ninetails board installed 
 - AmigaOS 2.x or newer
+

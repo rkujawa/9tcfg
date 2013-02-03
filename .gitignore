@@ -1,3 +1,3 @@
 src/9tcfg
-src/9tcfg.o
+src/*.o
 src/9tcfg.ps
