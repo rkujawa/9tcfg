@@ -5,7 +5,34 @@
 
 #include "config.h"
 #include "rom.h"
+#include "hardware.h"
 #include "file.h"
+
+BOOL rom_copy_self(BYTE *rombuf, ULONG romsize);
+
+/* copy rom over itself */
+void
+shadow_activate_self(void)
+{
+	
+	UBYTE r1, r2;
+
+	r1 = cfgreg_read(CFG_R1_OFFSET);
+	r2 = cfgreg_read(CFG_R2_OFFSET);
+
+	if ( (r1 & CFG_R1_MAPROM) || (r2 & CFG_R2_MAPROM_STATUS)) {
+		printf("Cannot enable Shadow ROM if MAPROM enabled or currently active!\n");
+		return;
+	}
+
+/*	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF);  */
+
+	memcpy((void*) 0xE00000, (void*) 0xE00000, 512*1024);	
+	memcpy((void*) 0xF80000, (void*) 0xF80000, 512*1024);	
+
+/*	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF);  */
+	cfgreg_set(CFG_R1_OFFSET, CFG_R1_SHADOWROM); 
+}
 
 /*
 void bank_select(uint8_t banknum);
@@ -57,29 +84,6 @@ bank_copy(uint32_t address)
 	memcpy((void*) MAPROM_BANK_ADDRESS, (void*) address, 256*1024);	
 }
 */
-/* copy rom over itself */
-void
-shadow_activate_self(void)
-{
-	
-	uint8_t r1, r2;
-
-	r1 = cfgreg_read(CFG_R1_OFFSET);
-	r2 = cfgreg_read(CFG_R2_OFFSET);
-
-	if ( (r1 & CFG_R1_MAPROM) || (r2 & CFG_R2_MAPROM_STATUS)) {
-		printf("Cannot enable Shadow ROM if MAPROM enabled or currently active!\n");
-		return;
-	}
-
-	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
-
-	memcpy((void*) 0xE00000, (void*) 0xE00000, 512*1024);	
-	memcpy((void*) 0xF80000, (void*) 0xF80000, 512*1024);	
-
-	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
-	cfgreg_set(CFG_R1_OFFSET, CFG_R1_SHADOWROM); 
-}
 
 /* activate shadow rom functionality */
 /*
@@ -115,11 +119,11 @@ shadow_activate(void)
 */
 
 void
-rom_load(char *path)
+rom_load(BYTE *path)
 {
-	char *rombuf;
-	size_t romsize;
-	uint8_t r1, r2;
+	BYTE *rombuf;
+	ULONG romsize;
+	UBYTE r1, r2;
 
 	r1 = cfgreg_read(CFG_R1_OFFSET);
 	r2 = cfgreg_read(CFG_R2_OFFSET);
@@ -142,7 +146,7 @@ rom_load(char *path)
 	romsize = file_size(path);
 
 #ifdef DEBUG
-	printf("DEBUG: m'kay so apparanetly loaded ROM has size: %x\n", (unsigned int) romsize);
+	printf("DEBUG: m'kay so apparanetly loaded ROM has size: %lx\n", romsize);
 #endif /* DEBUG */
 
 	rombuf = (char*) malloc(romsize);
@@ -153,6 +157,43 @@ rom_load(char *path)
 
 	file_load(path, rombuf, romsize);
 
+	rom_copy_self(rombuf, romsize);
+	/*rom_copy_bank(rombuf, romsize);*/
+
+	free(rombuf);
+	printf("Your Amiga should be restarted now...\n");
+}
+
+BOOL
+rom_copy_self(BYTE *rombuf, ULONG romsize)
+{
+	switch (romsize) {
+	case 262144:
+		memcpy((void*) rombuf, (void*) 0xE00000, S256K);	
+		memcpy((void*) rombuf, (void*) (0xE00000+S256K), S256K);	
+		memcpy((void*) rombuf, (void*) 0xF80000, S256K);	
+		memcpy((void*) rombuf, (void*) (0xF80000+S256K), S256K);	
+		break;
+	case 524288:
+		memcpy((void*) rombuf, (void*) 0xE00000, S512K);	
+		memcpy((void*) rombuf, (void*) 0xF80000, S512K);	
+		break;
+	case 1048576:
+		memcpy((void*) rombuf, (void*) 0xE00000, S512K);	
+		memcpy((void*) (rombuf+S512K), (void*) 0xF80000, S512K);	
+		break;
+	default:
+		printf("Unsupported ROM size %x\n, ROM must be exactly 256kB, 512kB or 1MB\n", (unsigned int) romsize);
+		return 0;
+		break;
+	}
+
+	return 1;	
+}
+/*
+void
+rom_copy_bank(char *rombuf, ULONG romsize)
+{
 	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
 	switch (romsize) {
 	case 262144:
@@ -187,16 +228,11 @@ rom_load(char *path)
 		break;
 	default:
 		printf("Unsupported ROM size %x\n, ROM must be exactly 256kB, 512kB or 1MB\n", (unsigned int) romsize);
-		/* bail out */
-		/*free(rombuf);*/
+		// bail out 
 		cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
 		return;
 		break;
 	}
-
-	/*free(rombuf);*/
 	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF); 
-
-	printf("Your Amiga should be restarted now...\n");
 }
-
+*/

@@ -32,6 +32,9 @@
 #define ADDMEM_1_BASE		0xF00000
 #define ADDMEM_PRI		0
 
+#define S256K			256*1024
+#define S512K			512*1024
+
 UBYTE *cardaddr = CFG_ADDRESS;
 
 #endif /* _HARDWARE_H_ */

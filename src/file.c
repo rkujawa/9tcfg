@@ -12,7 +12,7 @@
 
 /* get file size */
 ULONG
-file_size(char *path)
+file_size(BYTE *path)
 {
 	int fd;
 	ULONG filesize;

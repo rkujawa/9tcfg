@@ -7,6 +7,7 @@
 
 #include "hardware.h"
 #include "config.h"
+#include "addmem.h"
 
 /* add non-autoconfiguring memory to the system */
 void
