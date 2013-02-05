@@ -24,17 +24,17 @@ void status_display(void);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.2 (03.02.2013)";
+static const STRPTR version = "\0$VER: 9tcfg 0.2.1 (03.02.2013)";
 
 /* -- implementation -- */
 
 /* display program usage information */
-void
+/*void
 usage(void) 
 {
 	printf("usage: 9tcfg [--68kmode=0|1] [--instcache=0|1] [--pcmciamode=0|1] [--maprom=0|1] [--mapromload=file.rom] [--shadowrom=0|1] [--memoryadd] [--reboot]\n");	
 }
-
+*/
 /* read and display configuration registers */
 void
 status_display(void) 
@@ -109,114 +109,15 @@ status_display(void)
 int
 main(int argc, char *argv[])
 {
-	int ch;
+	struct RDArgs *result;
+	CONST_STRPTR argTemplate = "MAPROM/T,LOADROM/K,SHADOWROM/T,REBOOT/S,MEMORYADD/S";
+	LONG argArray[] = { 0, 0, 0, 0, 0 };
 
-	bool flag_maprombank = 0;	uint8_t maprombank_number;
-	bool flag_customaddress = 0;	uint32_t customaddress = 0;
-	bool flag_copytobank = 0;	uint32_t copytobank_address = 0;
-	bool flag_loadrom = 0;		char loadrom_path[256];
-	bool flag_memoryadd = 0;
-	bool flag_shadowromactivate = 0;
-	bool flag_shadowromactivateself = 0;
-	bool flag_reboot = 0;
+	result = IDOS->ReadArgs(argTemplate, argArray, NULL);
 
-	extern char *optarg;
-	extern int optind;
+	/* ... */
 
-	static struct option longopts[] = {
-		{ "disable020",		no_argument,	&toggles[0].disable_flag,	'd' },
-		{ "enable020",		no_argument,	&toggles[0].enable_flag,	'e' },
-		{ "pcmciamodeoff",	no_argument,	&toggles[1].disable_flag,	'p' },
-		{ "pcmciamodeon",	no_argument,	&toggles[1].enable_flag,	'P' },
-		{ "instcacheoff",	no_argument,	&toggles[2].disable_flag,	'I' },
-		{ "instcacheon",	no_argument,	&toggles[2].enable_flag,	'i' },
-		{ "writelockoff",	no_argument,	&toggles[3].disable_flag,	'u' },
-		{ "writelockon",	no_argument,	&toggles[3].enable_flag,	'l' },
-		{ "mapromoff",		no_argument,	&toggles[4].disable_flag,	'M' },
-		{ "mapromon",		no_argument,	&toggles[4].enable_flag,	'm' },
-		{ "shadowromoff",	no_argument,	&toggles[5].disable_flag,	'S' },
-		{ "shadowromon",	no_argument,	&toggles[5].enable_flag,	's' },
-		{ "shadowromactivate",	no_argument,	NULL, 'o' },	
-		{ "shadowromactivateself",no_argument,	NULL, 'O' },	
-		{ "maprombank",		required_argument, NULL, 'b' },
-		{ "customaddress",	required_argument, NULL, 'a' },
-		{ "copytobank",		required_argument, NULL, 'c' },
-		{ "mapromload",		required_argument, NULL, 'f' },
-		{ "memoryadd",		no_argument,	NULL, 'r' },
-		{ "reboot",		no_argument,	NULL, 'R' },
-		{ NULL,			0,		NULL,	0 }
-	};
-
-	while ((ch = getopt_long(argc, argv, "depPIiulMmSsbahcro?:", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'b':
-			flag_maprombank = 1;
-			maprombank_number = atoi(optarg);
-			break;
-		case 'a':
-			flag_customaddress = 1;
-			customaddress = strtoul(optarg, NULL, 16);
-			break;
-		case 'c':
-			flag_copytobank = 1;
-			copytobank_address = strtoul(optarg, NULL, 16); 
-			break;
-		case 'r':
-			flag_memoryadd = 1;
-			break;
-		case 'R':
-			flag_reboot = 1;
-			break;
-		case 'o':
-			flag_shadowromactivate = 1;
-			break;
-		case 'O':
-			flag_shadowromactivateself = 1;
-			break;
-		case 'f':
-			flag_loadrom = 1;
-			strncpy(loadrom_path, optarg, 256);
-			break;
-		case 0:
-			break;
-		case '?':
-		case 'h':
-		default: /* means that some weird args were passed */
-			usage();
-			exit(EXIT_FAILURE); /* exit in this case */
-		}
-
-	}
-	argc -= optind;
-	argv += optind;
-
-	if (flag_customaddress)
-		cardaddr = (void*) customaddress;
-
-	if (flag_maprombank)
-		bank_select(maprombank_number);
-
-	if (flag_copytobank)
-		bank_copy(copytobank_address);
-
-	if (flag_memoryadd)
-		memory_add();
-
-	if (flag_loadrom)
-		loadrom(loadrom_path);
-
-	if (flag_shadowromactivateself)
-		shadow_activate_self();
-
-	if (flag_shadowromactivate)
-		shadow_activate();
-
-	flag_toggle();
-
-	cfgreg_display();
-
-	if (flag_reboot)
-		reboot();
+	return 0;
 }
 
 /* reboot the machine */
