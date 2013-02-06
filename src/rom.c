@@ -182,18 +182,18 @@ rom_copy_self(BYTE *rombuf, ULONG romsize)
 {
 	switch (romsize) {
 	case 262144:
-		memcpy((void*) rombuf, (void*) 0xE00000, S256K);	
-		memcpy((void*) rombuf, (void*) (0xE00000+S256K), S256K);	
-		memcpy((void*) rombuf, (void*) 0xF80000, S256K);	
-		memcpy((void*) rombuf, (void*) (0xF80000+S256K), S256K);	
+		memcpy((void*) 0xE00000, (void*) rombuf, S256K);	
+		memcpy((void*) (0xE00000+S256K), (void*) rombuf, S256K);	
+		memcpy((void*) 0xF80000, (void*) rombuf, S256K);	
+		memcpy((void*) (0xF80000+S256K), (void*) rombuf, S256K);	
 		break;
 	case 524288:
-		memcpy((void*) rombuf, (void*) 0xE00000, S512K);	
-		memcpy((void*) rombuf, (void*) 0xF80000, S512K);	
+		memcpy((void*) 0xE00000, (void*) rombuf, S512K);	
+		memcpy((void*) 0xF80000, (void*) rombuf, S512K);	
 		break;
 	case 1048576:
-		memcpy((void*) rombuf, (void*) 0xE00000, S512K);	
-		memcpy((void*) (rombuf+S512K), (void*) 0xF80000, S512K);	
+		memcpy((void*) 0xE00000, (void*) rombuf, S512K);	
+		memcpy((void*) 0xF80000, (void*) rombuf, S512K);	
 		break;
 	default:
 		printf("Unsupported ROM size %x\n, ROM must be exactly 256kB, 512kB or 1MB\n", (unsigned int) romsize);
