@@ -2,13 +2,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
-
-#include <getopt.h>
 
 #include <exec/types.h>
+#include <exec/execbase.h>
+#include <workbench/startup.h>
+
+#include <proto/dos.h>
+#include <proto/exec.h>
 
 #include "config.h"
 #include "hardware.h"
@@ -24,7 +24,7 @@ void status_display(void);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.2.1 (03.02.2013)";
+static const STRPTR version = "\0$VER: 9tcfg 0.2.2 (06.02.2013) $Id$";
 
 /* -- implementation -- */
 
@@ -36,7 +36,7 @@ usage(void)
 }
 */
 /* read and display configuration registers */
-void
+/*void
 status_display(void) 
 {
 	uint8_t r0, r1, r2;
@@ -105,17 +105,91 @@ status_display(void)
 		printf("disabled\n");
 
 }
-
+*/
 int
 main(int argc, char *argv[])
 {
+
+	/*
+	 * AmigaOS ReadArgs-style argument parsing is an inconsistent shit.
+	 * Pile of shit. Period.
+	 */
 	struct RDArgs *result;
-	CONST_STRPTR argTemplate = "MAPROM/T,LOADROM/K,SHADOWROM/T,REBOOT/S,MEMORYADD/S";
-	LONG argArray[] = { 0, 0, 0, 0, 0 };
+	CONST_STRPTR argTemplate =
+	    "MAPROM/T,SHADOWROM/T,LOADROM/K,MEMORYADD/S,REBOOT/S";
+#define ARGNUM		5
+#define TOGGLE_EMPTY	-2
+#define TOGGLE_FALSE	0x0
+#define TOGGLE_TRUE	0xFFFFFFFF
 
-	result = IDOS->ReadArgs(argTemplate, argArray, NULL);
+#define MAPROM_ARG	0
+#define SHADOWROM_ARG	1
+#define LOADROM_ARG	2
+#define MEMORYADD_ARG	3
+#define REBOOT_ARG	4
 
-	/* ... */
+	LONG *argArray;
+	argArray = AllocVec(ARGNUM*sizeof(LONG), MEMF_ANY|MEMF_CLEAR);
+
+	argArray[MAPROM_ARG] = TOGGLE_EMPTY;
+	argArray[SHADOWROM_ARG] = TOGGLE_EMPTY;
+
+	result = ReadArgs(argTemplate, argArray, NULL);
+
+	/* 
+	 * Some RURUs for correct usage of this program...
+	 */
+	printf("%p %x\n", argArray[MAPROM_ARG], *argArray);
+
+	if ( ((LONG) argArray[MAPROM_ARG] != TOGGLE_EMPTY) &&
+	   ((LONG) argArray[SHADOWROM_ARG] != TOGGLE_EMPTY) ) {
+		printf("MAPROM and SHADOWROM can't be used together!\n");
+		return 10;
+	}
+
+	if ( ((LONG) argArray[MAPROM_ARG] != TOGGLE_EMPTY))
+	{
+#ifdef DEBUG
+		printf("DEBUG: MAPROM arugment passed\n");
+#endif /* DEBUG */
+		/* MAPROM ON only if LOADROM passed. */
+		if ((LONG) argArray[MAPROM_ARG] == TOGGLE_TRUE) {
+			if ((LONG) argArray[LOADROM_ARG] == 0) {
+				printf("MAPROM ON must be used with LOADROM!\n");
+				return 10;
+			}
+			maprom_enable((STRPTR) argArray[LOADROM_ARG]);
+		} /* else
+			maprom_disable(); */
+	}
+	if ( ((LONG) argArray[SHADOWROM_ARG] != TOGGLE_EMPTY))
+	{
+#ifdef DEBUG
+		printf("DEBUG: SHADOWROM arugment passed\n");
+#endif /* DEBUG */
+		if ((LONG) argArray[SHADOWROM_ARG] == TOGGLE_TRUE) {
+			shadowrom_enable();
+		} else {
+			/* shadowrom_disable(); */
+		}
+
+	}
+	if ( ((LONG) argArray[MEMORYADD_ARG] != 0))
+	{
+#ifdef DEBUG
+		printf("DEBUG: SHADOWROM arugment passed\n");
+#endif /* DEBUG */
+	}
+
+	if ((LONG) argArray[REBOOT_ARG] != 0) {
+		reboot();
+	}
+
+	/* TODO: Display status... */
+
+	/* Free everything and return to OS. */
+	FreeArgs(result);
+	FreeVec(argArray);
 
 	return 0;
 }

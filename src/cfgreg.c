@@ -6,6 +6,8 @@
 #include "hardware.h"
 #include "config.h"
 
+static UBYTE *cardaddr = CFG_ADDRESS;
+
 /* read register at offset */
 UBYTE
 cfgreg_read(UBYTE offset) 

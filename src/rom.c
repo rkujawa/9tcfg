@@ -12,7 +12,7 @@ BOOL rom_copy_self(BYTE *rombuf, ULONG romsize);
 
 /* copy rom over itself */
 void
-shadow_activate_self(void)
+shadowrom_enable(void)
 {
 	
 	UBYTE r1, r2;
@@ -119,7 +119,7 @@ shadow_activate(void)
 */
 
 void
-rom_load(BYTE *path)
+maprom_enable(BYTE *path)
 {
 	BYTE *rombuf;
 	ULONG romsize;

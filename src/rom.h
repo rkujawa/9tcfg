@@ -1,3 +1,5 @@
-void rom_load(char *path);
-void shadow_activate_self(void);
+void maprom_enable(char *path);
+void maprom_disable();
+void shadowrom_enable(void);
+void shadowrom_disable(void);
 

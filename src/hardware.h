@@ -35,7 +35,5 @@
 #define S256K			256*1024
 #define S512K			512*1024
 
-UBYTE *cardaddr = CFG_ADDRESS;
-
 #endif /* _HARDWARE_H_ */
 
