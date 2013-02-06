@@ -3,9 +3,9 @@ RMRF=rm
 GROFF=groff
 
 CFLAGS=
-LDFLAGS=-lamiga -lposix
+LDFLAGS=-lamiga #-lposix
 
-OBJECTS=file.o cfgreg.o addmem.o rom.o 9tcfg.o
+OBJECTS=cpu.o file.o cfgreg.o addmem.o rom.o 9tcfg.o
 MANPAGE=9tcfg.1
 
 EXECUTABLE=9tcfg

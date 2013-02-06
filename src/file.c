@@ -1,43 +1,66 @@
 /* Ninetails configuration program */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
 
 #include <exec/types.h>
+#include <dos/dos.h>
+
+#include <proto/dos.h>
+#include <proto/exec.h>
 
 #include "file.h"
+#include "config.h"
 
 /* get file size */
 ULONG
 file_size(BYTE *path)
-{
-	int fd;
-	ULONG filesize;
-	struct stat statbuf;
+{ 
+	BPTR file;
+	struct FileInfoBlock *fib;
+	struct Library *dosBase;
 
-	if ((fd = open(path, O_RDONLY)) == -1)  {	
-		perror("Error openinig file");
-		return 0;
+	dosBase = OpenLibrary("dos.library", 40L);
+	if (!dosBase) {
+		printf("Error opening dos.library!\n");
+		exit(20);
 	}
 
-	fstat(fd, &statbuf);
-	filesize = statbuf.st_size;
+	fib = (struct FileInfoBlock *) AllocDosObject(DOS_FIB, TAG_END);
+	if (!fib) {
+		printf("Couldn't allocate dos object!\n");
+		CloseLibrary(dosBase);
+		exit(20);
+	}
 
-	close(fd);
+	if (file = Lock(path, SHARED_LOCK)) {
 
-	return filesize;
+		if (Examine(file, fib)) {
+#ifdef DEBUG
+			printf("DEBUG: Examine() returns file size %lx\n", fib->fib_Size);
+#endif /* DEBUG */
+		} else {
+			printf("Couldn't Examine() file!\n"); /* XXX */
+		}
+
+		UnLock(file);
+	} else {
+		printf("Couldn't lock file!\n");
+		exit(20);
+	}
+
+	FreeDosObject(DOS_FIB, fib);
+	CloseLibrary(dosBase);
+	
+	return fib->fib_Size;
 }
 
 /* load file to memory buffer */
 BOOL
 file_load(BYTE *path, BYTE *filebuf, ULONG filesize)
 {
-	int fd;
+	BPTR fh;
 
-	if ((fd = open(path, O_RDONLY)) == -1)  {	
+	if ((fh = Open(path, MODE_OLDFILE)) == -1)  {	
 		perror("Error openinig file");
 		return 0;
 	}
@@ -46,12 +69,12 @@ file_load(BYTE *path, BYTE *filebuf, ULONG filesize)
 	printf("DEBUG: loading %lx bytes long file at %p\n", (ULONG) filesize, (void*) filebuf);
 #endif /* DEBUG */
 
-	if (read(fd, filebuf, filesize) == -1) {
+	if (Read(fh, filebuf, filesize) == -1) {
 		perror("Error reading file");
 		return 0;
 	}
 
-	close(fd);
+	Close(fh);
 
 	return 1;
 }

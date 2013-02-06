@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #include <exec/types.h>
 #include <exec/execbase.h>
@@ -8,6 +7,8 @@
 #include "hardware.h"
 #include "config.h"
 #include "addmem.h"
+
+#pragma dontwarn 113 
 
 /* add non-autoconfiguring memory to the system */
 void

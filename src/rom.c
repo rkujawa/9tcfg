@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 #include <exec/types.h>
 
@@ -9,6 +8,12 @@
 #include "file.h"
 
 BOOL rom_copy_self(BYTE *rombuf, ULONG romsize);
+
+void
+shadowrom_disable(void)
+{
+	cfgreg_unset(CFG_R1_OFFSET, CFG_R1_SHADOWROM); 
+}
 
 /* copy rom over itself */
 void
@@ -119,6 +124,12 @@ shadow_activate(void)
 */
 
 void
+maprom_disable()
+{
+	cfgreg_unset(CFG_R1_OFFSET, CFG_R1_MAPROM); 
+}
+
+void
 maprom_enable(BYTE *path)
 {
 	BYTE *rombuf;
@@ -159,6 +170,8 @@ maprom_enable(BYTE *path)
 
 	rom_copy_self(rombuf, romsize);
 	/*rom_copy_bank(rombuf, romsize);*/
+
+	cfgreg_set(CFG_R1_OFFSET, CFG_R1_MAPROM); 
 
 	free(rombuf);
 	printf("Your Amiga should be restarted now...\n");
