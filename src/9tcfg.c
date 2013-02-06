@@ -24,7 +24,7 @@ void status_display(void);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.2.2 (06.02.2013) $Id$";
+static const STRPTR version = "\0$VER: 9tcfg 0.2.3 (06.02.2013) $Id$";
 
 /* -- implementation -- */
 
