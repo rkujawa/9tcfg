@@ -25,6 +25,11 @@ shadowrom_enable(void)
 	r1 = cfgreg_read(CFG_R1_OFFSET);
 	r2 = cfgreg_read(CFG_R2_OFFSET);
 
+	if (r2 & CFG_R2_68KMODE_STATUS) {
+		printf("Cannot use SHADOWROM if running on 68000! Please reenable 68020 and reboot first.\n");
+		return;
+	}
+
 	if ( (r1 & CFG_R1_MAPROM) || (r2 & CFG_R2_MAPROM_STATUS)) {
 		printf("Cannot enable Shadow ROM if MAPROM enabled or currently active!\n");
 		return;
@@ -147,6 +152,11 @@ maprom_enable(BYTE *path)
 
 	if (r2 & CFG_R2_MAPROM_STATUS) {
 		printf("Cannot load new ROM if MAPROM currently active. Please disable MAPROM and reboot first!\n");
+		return;
+	}
+
+	if (r2 & CFG_R2_68KMODE_STATUS) {
+		printf("Cannot use MAPROM if running on 68000! Please reenable 68020 and reboot first.\n");
 		return;
 	}
 
