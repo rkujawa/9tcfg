@@ -203,7 +203,7 @@ rom_copy_self(BYTE *rombuf, ULONG romsize)
 		break;
 	case 1048576:
 		memcpy((void*) 0xE00000, (void*) rombuf, S512K);	
-		memcpy((void*) 0xF80000, (void*) rombuf, S512K);	
+		memcpy((void*) 0xF80000, (void*) (rombuf + S512K), S512K);	
 		break;
 	default:
 		printf("Unsupported ROM size %x\n, ROM must be exactly 256kB, 512kB or 1MB\n", (unsigned int) romsize);
