@@ -7,18 +7,16 @@
 .Nd Ninetails accelerator configuration program 
 .Sh SYNOPSIS
 .Nm
-.Op Fl -disable020 | -enable020
-.Op Fl -instcacheoff | -instcacheon 
-.Op Fl -pcmciamodeoff | -pcmciamodeon
-.Op Fl -writelockoff | -writelockon
-.Op Fl -mapromoff | -mapromon
-.Op Fl -mapromload Ar <kick.rom>
-.Op Fl -shadowromoff | -shadowromon 
-.Op Fl -shadowromactivate
-.\" .Op Fl -customaddress Ar <0xADDRESS> 
-.\" .Op Fl -copytobank Ar <0xADDRESS> 
-.Op Fl -memoryadd
-.Op Fl -reboot
+.Op MODE68K/T
+.Op MODE68KMEMORY/T 
+.Op MODEPCMCIA/T
+.Op MAPROM/T
+.Op SHADOWROM/T 
+.Op LOADROM/K 
+.Op MEMORYADD/S 
+.Op INSTCACHE/T 
+.Op INSTCACHERESET/T 
+.Op REBOOT/S
 .Sh DESCRIPTION
 The 
 .Nm
@@ -27,42 +25,26 @@ The
 .Nm
 command takes the following flags and arguments:
 .Bl -tag -width
-.It Fl -disable020
-Disable the 68020 processor after next reboot.
-.It Fl -enable020
-Enable the 68020 processor after next reboot (default).
-.It Fl -instcacheoff
-Turn off instruction cache.
-.It Fl -instcacheon
-Turn on instruction cache (default).
-.It Fl -pcmciamodeoff
-Disable the PCMCIA mode (default).
-XXX: what does it really do? does it need reboot?
-.It Fl -pcmciamodeon
-Enable the PCMCIA mode.
-XXX: as above
-.It Fl -writelockoff 
-Unprotect the 0xB80000 - 0xBC0000 bank area.
-.It Fl -writelockon
-Protect the 0xB80000 - 0xBC0000 bank area (default).
-.It Fl -mapromoff
-Turn off MAPROM after next reboot (default).
-.It Fl -mapromon
-Turn on MAPROM after next reboot.
-.It Fl -mapromload Ar <kick.rom>
-Load ROM for use with MAPROM. Should be used with
-.Fl -mapromon
-switch.
-.It Fl -shadowromoff
-Disable Shadow ROM function after next reboot (default).
-.It Fl -shadowromon
-Enable Shadow ROM function after next reboot.
-.It Fl -shadowromactivate
-Copy the Kickstart image from ROM chip into bank area.
-.It Fl -memoryadd 
-Add 1,5MB of non-autoconfiguring Fast RAM to operating system memory list.
-.It Fl -reboot
+.It MODE68K/T
+68000 mode - disable/enable the 68020 processor after next reboot (off by default).
+.It MODE68KMEMORY/T
+68000 mode + Fast RAM - as above but with 5.5MB of Fast (off by default).
+.It INSTCACHE/T 
+Turn off/on instruction cache (on by default).
+.It INSTCACHERESET/T 
+Turn off/on instruction cache at next reset (on by default).
+.It MODEPCMCIA/T 
+Disable a part of memory to allow PCMCIA access (off by default).
+.It MAPROM/T
+Enable/disable the MAPROM function, must be used with LOADROM/K (off by default).
+.It SHADOWROM/T 
+Enable/disable the Shadow ROM function, may not be used when MAPROM is enabled (off by default).
+.It LOADROM/K 
+Specify the Kickstart ROM file to load. Must be exactly 256kB, 512kB or 1MB.
+.It REBOOT/S 
 Reboot the Amiga after setting requrested options.
+.It MEMORYADD/S
+Add 1,5MB of non-autoconfiguring Fast RAM to operating system memory list.
 .El
 .Sh AUTHORS
 Ninetails board was designed and produced by Rafal Chyla.
