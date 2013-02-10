@@ -158,13 +158,14 @@ main(int argc, char *argv[])
 		return 10;
 	}
 
+	cfgreg_unlock();
+
 	/* MAPROM ON only if LOADROM passed. */
 	if ((LONG) argArray[MAPROM_ARG] == TOGGLE_TRUE) {
 		if ((LONG) argArray[LOADROM_ARG] == 0) {
 			printf("MAPROM ON must be used with LOADROM!\n");
-			return 10;
-		}
-		maprom_enable((STRPTR) argArray[LOADROM_ARG]);
+		} else 
+			maprom_enable((STRPTR) argArray[LOADROM_ARG]);
 	} else if ((LONG) argArray[MAPROM_ARG] == TOGGLE_FALSE) {
 		maprom_disable();
 	}
@@ -218,6 +219,8 @@ main(int argc, char *argv[])
 	}
 
 	status_display();
+
+	cfgreg_lock();
 
 	/* Free everything and return to OS. */
 	FreeArgs(result);

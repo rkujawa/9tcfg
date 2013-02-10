@@ -59,3 +59,27 @@ cfgreg_unset(UBYTE offset, UBYTE bits)
 	cfgreg_write(offset, v);
 }
 
+void
+cfgreg_unlock(void) 
+{
+#ifdef DEBUG
+	printf("DEBUG: unlocking registers\n");
+#endif /* DEBUG */
+	/* reset the FSM */
+	cfgreg_write(CFG_LOCK0_OFFSET, 0);
+
+	/* sequence to unlock registers */
+	cfgreg_write(CFG_LOCK3_OFFSET, 0x60);
+	cfgreg_write(CFG_LOCK2_OFFSET, 0xA0);
+	cfgreg_write(CFG_LOCK1_OFFSET, 0x50);
+	cfgreg_write(CFG_LOCK0_OFFSET, 0x90);
+}
+
+void
+cfgreg_lock(void)
+{
+#ifdef DEBUG
+	printf("DEBUG: locking registers\n");
+#endif /* DEBUG */
+	cfgreg_write(CFG_LOCK0_OFFSET, 0);
+}

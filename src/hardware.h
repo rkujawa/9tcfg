@@ -2,12 +2,17 @@
 #ifndef _HARDWARE_H_
 #define _HARDWARE_H_
 
-#define CFG_ADDRESS		0xBE0000
+#define CFG_ADDRESS		0xBEFF00	
 /*#define CFG_ADDRESS		0x7FF0FFFF*/
-#define CFG_R0_OFFSET		0x0
-#define CFG_R1_OFFSET		0x4
-#define CFG_R2_OFFSET		0x8
-#define CFG_R3_OFFSET		0xC
+#define CFG_R0_OFFSET		0x10
+#define CFG_R1_OFFSET		0x14
+#define CFG_R2_OFFSET		0x18
+#define CFG_R3_OFFSET		0x1C
+
+#define CFG_LOCK0_OFFSET	0x0
+#define CFG_LOCK1_OFFSET	0x4
+#define CFG_LOCK2_OFFSET	0x8
+#define CFG_LOCK3_OFFSET	0xC
 
 #define CFG_R0_68KMODE		0x80	/* 1xxxxxxx - disable 68020 at next reset */
 #define CFG_R0_PCMCIA		0x40	/* x1xxxxxx - PCMCIA mode */
