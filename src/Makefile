@@ -1,5 +1,5 @@
 CC=vc
-RMRF=rm
+RMRF=rm -rf
 GROFF=groff
 
 CFLAGS=
@@ -25,5 +25,5 @@ $(MANPAGEPS) : $(MANPAGE)
 	$(CC) $(CFLAGS) -c $<
 
 clean :
-	$(RM) -rf $(OBJECTS) $(EXECUTABLE) $(MANPAGEPS) 
+	$(RMRF) $(OBJECTS) $(EXECUTABLE) $(MANPAGEPS) 
 
