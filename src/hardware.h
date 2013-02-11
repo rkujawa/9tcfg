@@ -3,7 +3,8 @@
 #define _HARDWARE_H_
 
 #define CFG_ADDRESS		0xBEFF00	
-/*#define CFG_ADDRESS		0x7FF0FFFF*/
+
+
 #define CFG_R0_OFFSET		0x10
 #define CFG_R1_OFFSET		0x14
 #define CFG_R2_OFFSET		0x18

@@ -3,9 +3,10 @@ RMRF=rm
 GROFF=groff
 
 CFLAGS=
-LDFLAGS=-lamiga #-lposix
+LDFLAGS=-lamiga
 
 OBJECTS=cpu.o file.o cfgreg.o addmem.o rom.o 9tcfg.o
+ADDHEADERS=config.h hardware.h
 MANPAGE=9tcfg.1
 
 EXECUTABLE=9tcfg
@@ -20,7 +21,7 @@ $(MANPAGEPS) : $(MANPAGE)
 9tcfg : $(OBJECTS)
 	$(CC) -o $(EXECUTABLE) $(LDFLAGS) $(OBJECTS)
 
-%.o : %.c
+%.o : %.c %.h $(ADDHEADERS)
 	$(CC) $(CFLAGS) -c $<
 
 clean :
