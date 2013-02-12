@@ -15,10 +15,10 @@ void
 memory_add(void)
 {
 	if (!memory_check_added(ADDMEM_0_BASE))
-		AddMemList(1*1024*1024, MEMF_FAST, ADDMEM_PRI, ADDMEM_0_BASE, "9T A8 RAM");
+		AddMemList(1*1024*1024, MEMF_FAST, ADDMEM_PRI, ADDMEM_0_BASE, NULL);
 
 	if (!memory_check_added(ADDMEM_1_BASE))
-		AddMemList(512*1024, MEMF_FAST, ADDMEM_PRI, ADDMEM_1_BASE, "9T F0 RAM");
+		AddMemList(512*1024, MEMF_FAST, ADDMEM_PRI, ADDMEM_1_BASE, NULL);
 }
 
 /* check if memory at given address is already added to system memory list */
