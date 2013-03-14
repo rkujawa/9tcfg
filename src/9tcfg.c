@@ -64,7 +64,7 @@ status_display(void)
 	printf("\t68000 mode at next reset: ");
 	status_print_reg(r0, CFG_R0_68KMODE);
 
-	printf("\t68000 mode + 5.5MB Fast at next reset: ");
+	printf("\t5.5MB Fast if 68000 active at next reset: ");
 	status_print_reg(r0, CFG_R0_68KMEMORYMODE);
 
 	printf("\t68000 mode status: ");
