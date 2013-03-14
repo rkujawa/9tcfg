@@ -70,8 +70,8 @@ status_display(void)
 	printf("\t68000 mode status: ");
 	status_print_reg(r2, CFG_R2_68KMODE_STATUS);
 
-	printf("\tPCMCIA mode (4MB autoconfig RAM): ");
-	status_print_reg_inv(r0, CFG_R0_PCMCIA2RAM);
+	printf("\tPCMCIA2RAM mode (add 4MB RAM, disable PCMCIA): ");
+	status_print_reg(r0, CFG_R0_PCMCIA2RAM);
 
 	printf("\tInstruction cache: ");
 	status_print_reg_inv(r1, CFG_R1_INSTCACHEOFF);
