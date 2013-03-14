@@ -70,8 +70,8 @@ status_display(void)
 	printf("\t68000 mode status: ");
 	status_print_reg(r2, CFG_R2_68KMODE_STATUS);
 
-	printf("\tPCMCIA mode: ");
-	status_print_reg(r0, CFG_R0_PCMCIA);
+	printf("\tPCMCIA mode (4MB autoconfig RAM): ");
+	status_print_reg_inv(r0, CFG_R0_PCMCIA2RAM);
 
 	printf("\tInstruction cache at next reset");
 	status_print_reg_inv(r1, CFG_R1_INSTCACHERESET);
@@ -119,7 +119,7 @@ main(int argc, char *argv[])
 	 */
 	struct RDArgs *result;
 	CONST_STRPTR argTemplate =
-	    "MODE68K/T,MODE68KMEMORY/T,MODEPCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MEMORYADD/S,INSTCACHE/T,INSTCACHERESET/T,REBOOT/S";
+	    "MODE68K/T,MODE68KMEMORY/T,PCMCIA2RAM/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,INSTCACHERESET/T,REBOOT/S";
 #define ARGNUM		10	
 #define TOGGLE_EMPTY	-2
 #define TOGGLE_FALSE	0x0
@@ -127,11 +127,11 @@ main(int argc, char *argv[])
 
 #define MODE68K_ARG	0
 #define MODE68KMEMORY_ARG 1
-#define MODEPCMCIA_ARG	2
+#define PCMCIA2RAM_ARG	2
 #define MAPROM_ARG	3
 #define SHADOWROM_ARG	4	
 #define LOADROM_ARG	5	
-#define MEMORYADD_ARG	6
+#define MOREMEM_ARG	6
 #define INSTCACHE_ARG	7
 #define INSTCACHERESET_ARG 8
 #define REBOOT_ARG	9
@@ -141,7 +141,7 @@ main(int argc, char *argv[])
 
 	argArray[MODE68K_ARG] = TOGGLE_EMPTY;
 	argArray[MODE68KMEMORY_ARG] = TOGGLE_EMPTY;
-	argArray[MODEPCMCIA_ARG] = TOGGLE_EMPTY;
+	argArray[PCMCIA2RAM_ARG] = TOGGLE_EMPTY;
 	argArray[MAPROM_ARG] = TOGGLE_EMPTY;
 	argArray[SHADOWROM_ARG] = TOGGLE_EMPTY;
 	argArray[INSTCACHE_ARG] = TOGGLE_EMPTY;
@@ -176,10 +176,10 @@ main(int argc, char *argv[])
 		shadowrom_disable();
 	}
 
-	if ( ((LONG) argArray[MEMORYADD_ARG] != 0))
+	if ( ((LONG) argArray[MOREMEM_ARG] != 0))
 	{
 #ifdef DEBUG
-		printf("DEBUG: MEMORYADD arugment passed\n");
+		printf("DEBUG: MOREMEM arugment passed\n");
 #endif /* DEBUG */
 		memory_add();
 	}
@@ -196,10 +196,10 @@ main(int argc, char *argv[])
 		cpu_68kfast_disable();
 	}
 
-	if ((LONG) argArray[MODEPCMCIA_ARG] == TOGGLE_TRUE) {
-		pcmciamode_enable();
-	} else if ((LONG) argArray[MODEPCMCIA_ARG] == TOGGLE_FALSE)  {
-		pcmciamode_disable();
+	if ((LONG) argArray[PCMCIA2RAM_ARG] == TOGGLE_TRUE) {
+		pcmcia2ram_enable();
+	} else if ((LONG) argArray[PCMCIA2RAM_ARG] == TOGGLE_FALSE)  {
+		pcmcia2ram_disable();
 	}
 
 	if ((LONG) argArray[INSTCACHE_ARG] == TOGGLE_TRUE) {

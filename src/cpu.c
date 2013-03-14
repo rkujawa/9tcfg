@@ -34,15 +34,15 @@ cpu_68kfast_disable()
 }
 
 void
-pcmciamode_enable()
+pcmcia2ram_enable()
 {
-	cfgreg_set(CFG_R0_OFFSET, CFG_R0_PCMCIA);
+	cfgreg_set(CFG_R0_OFFSET, CFG_R0_PCMCIA2RAM);
 }
 
 void
-pcmciamode_disable()
+pcmcia2ram_disable()
 {
-	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_PCMCIA);
+	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_PCMCIA2RAM);
 }
 
 void 

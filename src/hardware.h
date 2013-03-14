@@ -16,7 +16,7 @@
 #define CFG_LOCK3_OFFSET	0xC
 
 #define CFG_R0_68KMODE		0x80	/* 1xxxxxxx - disable 68020 at next reset */
-#define CFG_R0_PCMCIA		0x40	/* x1xxxxxx - PCMCIA mode */
+#define CFG_R0_PCMCIA2RAM	0x40	/* x1xxxxxx - PCMCIA disable, add 4MB */
 #define CFG_R0_68KMEMORYMODE	0x20	/* xx1xxxxx - 68000 + 5.5MB fast expansion */
 
 #define CFG_R1_MAPROM		0x80	/* 1xxxxxxx - MAPROM at next reset */
