@@ -64,17 +64,17 @@ status_display(void)
 	printf("\t68000 mode at next reset: ");
 	status_print_reg(r0, CFG_R0_68KMODE);
 
-	printf("\t68000 mode + 5.5MB Fast at next reset: ");
+	printf("\t5.5MB Fast if 68000 active at next reset: ");
 	status_print_reg(r0, CFG_R0_68KMEMORYMODE);
 
 	printf("\t68000 mode status: ");
 	status_print_reg(r2, CFG_R2_68KMODE_STATUS);
 
-	printf("\tPCMCIA mode: ");
-	status_print_reg(r0, CFG_R0_PCMCIA);
+	//printf("\tPCMCIA mode: ");
+	//status_print_reg(r0, CFG_R0_PCMCIA);
 
-	printf("\tInstruction cache at next reset");
-	status_print_reg_inv(r1, CFG_R1_INSTCACHERESET);
+	//printf("\tInstruction cache at next reset");
+	//status_print_reg_inv(r1, CFG_R1_INSTCACHERESET);
 
 	printf("\tInstruction cache: ");
 	status_print_reg_inv(r1, CFG_R1_INSTCACHEOFF);
