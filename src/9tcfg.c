@@ -73,9 +73,6 @@ status_display(void)
 	printf("\tPCMCIA mode (4MB autoconfig RAM): ");
 	status_print_reg_inv(r0, CFG_R0_PCMCIA2RAM);
 
-	printf("\tInstruction cache at next reset");
-	status_print_reg_inv(r1, CFG_R1_INSTCACHERESET);
-
 	printf("\tInstruction cache: ");
 	status_print_reg_inv(r1, CFG_R1_INSTCACHEOFF);
 	
@@ -119,7 +116,7 @@ main(int argc, char *argv[])
 	 */
 	struct RDArgs *result;
 	CONST_STRPTR argTemplate =
-	    "MODE68K/T,MODE68KMEMORY/T,PCMCIA2RAM/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,INSTCACHERESET/T,REBOOT/S";
+	    "MODE68K/T,MODE68KMEMORY/T,PCMCIA2RAM/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S";
 #define ARGNUM		10	
 #define TOGGLE_EMPTY	-2
 #define TOGGLE_FALSE	0x0
@@ -133,8 +130,7 @@ main(int argc, char *argv[])
 #define LOADROM_ARG	5	
 #define MOREMEM_ARG	6
 #define INSTCACHE_ARG	7
-#define INSTCACHERESET_ARG 8
-#define REBOOT_ARG	9
+#define REBOOT_ARG	8
 
 	LONG *argArray;
 	argArray = AllocVec(ARGNUM*sizeof(LONG), MEMF_ANY|MEMF_CLEAR);
@@ -145,7 +141,6 @@ main(int argc, char *argv[])
 	argArray[MAPROM_ARG] = TOGGLE_EMPTY;
 	argArray[SHADOWROM_ARG] = TOGGLE_EMPTY;
 	argArray[INSTCACHE_ARG] = TOGGLE_EMPTY;
-	argArray[INSTCACHERESET_ARG] = TOGGLE_EMPTY;
 
 	result = ReadArgs(argTemplate, argArray, NULL);
 
@@ -181,7 +176,7 @@ main(int argc, char *argv[])
 #ifdef DEBUG
 		printf("DEBUG: MOREMEM arugment passed\n");
 #endif /* DEBUG */
-		memory_add();
+		memory_add_misc();
 	}
 
 	if ((LONG) argArray[MODE68K_ARG] == TOGGLE_TRUE) {
@@ -198,6 +193,7 @@ main(int argc, char *argv[])
 
 	if ((LONG) argArray[PCMCIA2RAM_ARG] == TOGGLE_TRUE) {
 		pcmcia2ram_enable();
+		memory_add_4m();
 	} else if ((LONG) argArray[PCMCIA2RAM_ARG] == TOGGLE_FALSE)  {
 		pcmcia2ram_disable();
 	}
@@ -206,12 +202,6 @@ main(int argc, char *argv[])
 		instcache_enable();
 	} else if ((LONG) argArray[INSTCACHE_ARG] == TOGGLE_FALSE) {
 		instcache_disable();
-	}
-
-	if ((LONG) argArray[INSTCACHERESET_ARG] == TOGGLE_TRUE) {
-		instcache_reset_enable();
-	} else if ((LONG) argArray[INSTCACHERESET_ARG] == TOGGLE_FALSE) {
-		instcache_reset_disable();
 	}
 
 	if ((LONG) argArray[REBOOT_ARG] != 0) {

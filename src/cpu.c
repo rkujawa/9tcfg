@@ -57,15 +57,3 @@ instcache_enable()
 	cfgreg_unset(CFG_R1_OFFSET, CFG_R1_INSTCACHEOFF);
 }
 
-void 
-instcache_reset_enable()
-{
-	cfgreg_set(CFG_R1_OFFSET, CFG_R1_INSTCACHERESET);
-}
-
-void 
-instcache_reset_disable()
-{
-	cfgreg_unset(CFG_R1_OFFSET, CFG_R1_INSTCACHERESET);
-}
-

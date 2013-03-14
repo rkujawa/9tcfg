@@ -37,6 +37,7 @@
 
 #define ADDMEM_0_BASE		0xA80000
 #define ADDMEM_1_BASE		0xF00000
+#define ADDMEM_PCMCIA_BASE	0x600000
 #define ADDMEM_PRI		0
 
 #define S256K			256*1024
