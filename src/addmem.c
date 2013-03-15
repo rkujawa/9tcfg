@@ -15,7 +15,7 @@ void
 memory_add_4m(void)
 {
 	if (!memory_check_added(ADDMEM_PCMCIA_BASE))
-		AddMemList(4*1024*1024, MEMF_FAST, ADDMEM_PRI, ADDMEM_0_BASE, NULL);
+		AddMemList(4*1024*1024, MEMF_FAST, ADDMEM_PRI, ADDMEM_PCMCIA_BASE, NULL);
 }
 
 /* add non-autoconfiguring memory to the system */

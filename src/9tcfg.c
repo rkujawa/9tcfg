@@ -116,7 +116,7 @@ main(int argc, char *argv[])
 	 */
 	struct RDArgs *result;
 	CONST_STRPTR argTemplate =
-	    "MODE68K/T,MODE68KMEMORY/T,PCMCIA2RAM/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S";
+	    "MODE68K/T,MODE68KMEMORY/T,PCMCIA2RAM/S,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S";
 #define ARGNUM		10	
 #define TOGGLE_EMPTY	-2
 #define TOGGLE_FALSE	0x0
@@ -137,7 +137,6 @@ main(int argc, char *argv[])
 
 	argArray[MODE68K_ARG] = TOGGLE_EMPTY;
 	argArray[MODE68KMEMORY_ARG] = TOGGLE_EMPTY;
-	argArray[PCMCIA2RAM_ARG] = TOGGLE_EMPTY;
 	argArray[MAPROM_ARG] = TOGGLE_EMPTY;
 	argArray[SHADOWROM_ARG] = TOGGLE_EMPTY;
 	argArray[INSTCACHE_ARG] = TOGGLE_EMPTY;
@@ -191,11 +190,9 @@ main(int argc, char *argv[])
 		cpu_68kfast_disable();
 	}
 
-	if ((LONG) argArray[PCMCIA2RAM_ARG] == TOGGLE_TRUE) {
+	if ((LONG) argArray[PCMCIA2RAM_ARG] != 0) {
 		pcmcia2ram_enable();
 		memory_add_4m();
-	} else if ((LONG) argArray[PCMCIA2RAM_ARG] == TOGGLE_FALSE)  {
-		pcmcia2ram_disable();
 	}
 
 	if ((LONG) argArray[INSTCACHE_ARG] == TOGGLE_TRUE) {
