@@ -15,6 +15,11 @@
 #define CFG_LOCK2_OFFSET	0x8
 #define CFG_LOCK3_OFFSET	0xC
 
+#define CFG_LOCK0_ID_REV0	0x10	/* ID sequence for Ninetails rev 0 */
+#define CFG_LOCK1_ID_REV0	0xE0
+#define CFG_LOCK2_ID_REV0	0x60
+#define CFG_LOCK3_ID_REV0	0x10
+
 #define CFG_R0_68KMODE		0x80	/* 1xxxxxxx - disable 68020 at next reset */
 #define CFG_R0_PCMCIA2RAM	0x40	/* x1xxxxxx - PCMCIA disable, add 4MB */
 #define CFG_R0_68KMEMORYMODE	0x20	/* xx1xxxxx - 68000 + 5.5MB fast expansion */
@@ -22,7 +27,6 @@
 #define CFG_R1_MAPROM		0x80	/* 1xxxxxxx - MAPROM at next reset */
 #define CFG_R1_SHADOWROM	0x40	/* x1xxxxxx - Shadow ROM now */
 #define CFG_R1_INSTCACHEOFF	0x20	/* xx1xxxxx - instruction cache off now */
-#define CFG_R1_INSTCACHERESET	0x10	/* xxx1xxxx - instruction cache off after reset */
 
 #define CFG_R2_68KMODE_STATUS	0x80	/* 1xxxxxxx - 68020 is disabled */
 #define CFG_R2_MAPROM_STATUS	0x40	/* x1xxxxxx - MAPROM is enabled */

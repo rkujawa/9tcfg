@@ -17,6 +17,9 @@
 #include "rom.h"
 #include "cpu.h"
 
+#define EXIT_SYNTAX_ERROR	10
+#define EXIT_HARDWARE_ERROR	20 
+
 /* -- function prototypes -- */
 
 void reboot(void);
@@ -109,6 +112,7 @@ status_display(void)
 int
 main(int argc, char *argv[])
 {
+	BYTE hwrev; /* hardware revision */
 
 	/*
 	 * AmigaOS ReadArgs-style argument parsing is an inconsistent shit.
@@ -149,7 +153,17 @@ main(int argc, char *argv[])
 	if ( ((LONG) argArray[MAPROM_ARG] != TOGGLE_EMPTY) &&
 	   ((LONG) argArray[SHADOWROM_ARG] != TOGGLE_EMPTY) ) {
 		printf("MAPROM and SHADOWROM can't be used together!\n");
-		return 10;
+		return EXIT_SYNTAX_ERROR;
+	}
+
+
+	hwrev = ninetails_detect();
+
+	if (hwrev == -1) {
+		printf("Ninetails board not detected!\n");
+		return EXIT_HARDWARE_ERROR;
+	} else {
+		printf("Ninetails revision %d\n", hwrev);
 	}
 
 	cfgreg_unlock();

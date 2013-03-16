@@ -83,3 +83,25 @@ cfgreg_lock(void)
 #endif /* DEBUG */
 	cfgreg_write(CFG_LOCK0_OFFSET, 0);
 }
+
+BYTE
+ninetails_detect(void)
+{
+	UBYTE l0, l1, l2, l3;
+#ifdef DEBUG
+	printf("DEBUG: running detection procedure\n");
+#endif /* DEBUG */
+	l0 = cfgreg_read(CFG_LOCK0_OFFSET);	
+	l1 = cfgreg_read(CFG_LOCK1_OFFSET);	
+	l2 = cfgreg_read(CFG_LOCK2_OFFSET);	
+	l3 = cfgreg_read(CFG_LOCK3_OFFSET);	
+
+	if ((l0 == CFG_LOCK0_ID_REV0) &&
+	    (l1 == CFG_LOCK1_ID_REV0) &&
+	    (l2 == CFG_LOCK2_ID_REV0) &&
+	    (l3 == CFG_LOCK3_ID_REV0))
+		return 0;
+
+	return -1;
+}
+
