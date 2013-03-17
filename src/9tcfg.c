@@ -58,9 +58,9 @@ status_display(void)
 {
 	UBYTE r0, r1, r2;
 
-	r0 = cfgreg_read(CFG_R0_OFFSET);
-	r1 = cfgreg_read(CFG_R1_OFFSET);
-	r2 = cfgreg_read(CFG_R2_OFFSET);
+	r0 = cfgreg_read(CFG_R0_OFFSET) & CFG_LOCK_ID_MASK;
+	r1 = cfgreg_read(CFG_R1_OFFSET) & CFG_LOCK_ID_MASK;
+	r2 = cfgreg_read(CFG_R2_OFFSET) & CFG_LOCK_ID_MASK;
 
 	printf(" ==================== CPU / Memory options ==================== \n");
 
@@ -189,7 +189,7 @@ main(int argc, char *argv[])
 #ifdef DEBUG
 		printf("DEBUG: MOREMEM arugment passed\n");
 #endif /* DEBUG */
-		memory_add_misc();
+	if(r2 & CFG_R2_68KMODE_STATUS) printf("MOREMEM is not allowed in 68000 mode"); else memory_add_misc();
 	}
 
 	if ((LONG) argArray[MODE68K_ARG] == TOGGLE_TRUE) {
@@ -205,8 +205,13 @@ main(int argc, char *argv[])
 	}
 
 	if ((LONG) argArray[PCMCIA2RAM_ARG] != 0) {
-		pcmcia2ram_enable();
-		memory_add_4m();
+		if(r2 & CFG_R2_68KMODE_STATUS)	{
+			printf("PCMCIA2RAM is not allowed in 68000 mode");
+			}
+		else {
+			pcmcia2ram_enable();
+			memory_add_4m();
+		}
 	}
 
 	if ((LONG) argArray[INSTCACHE_ARG] == TOGGLE_TRUE) {
