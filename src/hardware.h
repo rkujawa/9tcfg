@@ -19,6 +19,7 @@
 #define CFG_LOCK1_ID_REV0	0xE0
 #define CFG_LOCK2_ID_REV0	0x60
 #define CFG_LOCK3_ID_REV0	0x10
+#define CFG_LOCK_ID_MASK	0xF0
 
 #define CFG_R0_68KMODE		0x80	/* 1xxxxxxx - disable 68020 at next reset */
 #define CFG_R0_PCMCIA2RAM	0x40	/* x1xxxxxx - PCMCIA disable, add 4MB */
