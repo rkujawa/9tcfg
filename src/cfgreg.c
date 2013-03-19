@@ -23,7 +23,7 @@ cfgreg_read(UBYTE offset)
 	printf("DEBUG: read %x from %p\n", (int) v, (void*) ptr);
 #endif /* DEBUG */
 
-	return v;
+	return v & CFG_RX_MASK;	/* Mask out pins not tied to CPLD. */
 }
 
 /* write register at offset */
