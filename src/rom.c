@@ -22,8 +22,8 @@ shadowrom_enable(void)
 	
 	UBYTE r1, r2;
 
-	r1 = cfgreg_read(CFG_R1_OFFSET);
-	r2 = cfgreg_read(CFG_R2_OFFSET);
+	r1 = cfgreg_read(CFG_R1_OFFSET) & 0xF0;
+	r2 = cfgreg_read(CFG_R2_OFFSET) & 0xF0;
 
 	if (r2 & CFG_R2_68KMODE_STATUS) {
 		printf("Cannot use SHADOWROM if running on 68000! Please reenable 68020 and reboot first.\n");
@@ -32,6 +32,11 @@ shadowrom_enable(void)
 
 	if ( (r1 & CFG_R1_MAPROM) || (r2 & CFG_R2_MAPROM_STATUS)) {
 		printf("Cannot enable Shadow ROM if MAPROM enabled or currently active!\n");
+		return;
+	}
+	
+	if (r1 & CFG_R1_SHADOWROM) {
+		printf("Shadowrom is already active!\n");
 		return;
 	}
 
