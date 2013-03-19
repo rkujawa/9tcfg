@@ -21,6 +21,12 @@ cpu_68k_disable()
 	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_68KMODE);
 }
 
+BOOL
+cpu_68k_get()
+{
+	return cfgreg_read(CFG_R0_OFFSET) & CFG_R0_68KMODE;
+}
+
 void
 cpu_68kfast_enable()
 {

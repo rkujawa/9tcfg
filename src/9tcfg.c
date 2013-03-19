@@ -29,8 +29,10 @@ void status_print_reg_inv(UBYTE reg, UBYTE bit);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.3 (06.02.2013)\0";
+static const STRPTR version = "\0$VER: 9tcfg 0.4 (19.04.2013)\0";
 static const STRPTR id = "\0$Id$\0";
+
+static LONG *argArray;	/* arguments passed on the command line */
 
 /* -- implementation -- */
 
@@ -89,24 +91,52 @@ status_display(void)
 
 	printf("\tShadow ROM: ");
 	status_print_reg(r1, CFG_R1_SHADOWROM);
-	
-/*	printf("\tB80000-BC0000 write lock: ");
-	if (r0 & CFG_R0_WRITELOCKOFF)
-		printf("disabled\n");
-	else
-		printf("enabled\n");*/
-/*	printf("\tMAPROM bank: %d (bits: ", (int) bank_bits2num(r1));
-	if (r1 & CFG_R1_BANKBIT0)
-		printf("1");
-	else
-		printf("0");
-	if (r1 & CFG_R1_BANKBIT1)
-		printf("1");
-	else
-		printf("0");
-	printf(")\n");
-*/
+}
 
+BOOL
+arg_switch_isempty(UBYTE argNo)
+{
+	if ( ((LONG) argArray[argNo] != 0))
+		return 0;
+
+	return 1;
+}
+
+BOOL
+arg_toggle_val(UBYTE argNo)
+{
+#define TOGGLE_EMPTY	-2
+#define TOGGLE_FALSE	0x0
+#define TOGGLE_TRUE	0xFFFFFFFF
+	if ((LONG) argArray[argNo] == TOGGLE_TRUE)
+		return 1;
+	else if ((LONG) argArray[argNo] == TOGGLE_FALSE)
+		return 0;
+#ifdef DEBUG
+	else
+		/* I wonder if we'll observe one of these, duh. */
+		printf("DEBUG: toggle neither TRUE nor FALSE, this should not happen!\n");
+#endif /* DEBUG */
+
+	return 0;
+}
+
+BOOL
+arg_key_isempty(UBYTE argNo)
+{
+	if ((LONG) argArray[argNo] == 0)
+		return 1;
+	else
+		return 0;
+}
+
+BOOL
+arg_toggle_isempty(UBYTE argNo)
+{
+	if ((LONG) argArray[argNo] != TOGGLE_EMPTY)
+		return 0;	
+	else
+		return 1;
 }
 
 int
@@ -122,9 +152,6 @@ main(int argc, char *argv[])
 	CONST_STRPTR argTemplate =
 	    "MODE68K/T,MODE68KMEMORY/T,PCMCIA2RAM/S,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S";
 #define ARGNUM		10	
-#define TOGGLE_EMPTY	-2
-#define TOGGLE_FALSE	0x0
-#define TOGGLE_TRUE	0xFFFFFFFF
 
 #define MODE68K_ARG	0
 #define MODE68KMEMORY_ARG 1
@@ -136,7 +163,6 @@ main(int argc, char *argv[])
 #define INSTCACHE_ARG	7
 #define REBOOT_ARG	8
 
-	LONG *argArray;
 	argArray = AllocVec(ARGNUM*sizeof(LONG), MEMF_ANY|MEMF_CLEAR);
 
 	argArray[MODE68K_ARG] = TOGGLE_EMPTY;
@@ -150,12 +176,11 @@ main(int argc, char *argv[])
 	/* 
 	 * Some RURUs for correct usage of this program...
 	 */
-	if ( ((LONG) argArray[MAPROM_ARG] != TOGGLE_EMPTY) &&
-	   ((LONG) argArray[SHADOWROM_ARG] != TOGGLE_EMPTY) ) {
+	if ((!arg_toggle_isempty(MAPROM_ARG)) &&
+	   (!arg_toggle_isempty(SHADOWROM_ARG))) {
 		printf("MAPROM and SHADOWROM can't be used together!\n");
 		return EXIT_SYNTAX_ERROR;
 	}
-
 
 	hwrev = ninetails_detect();
 
@@ -168,54 +193,80 @@ main(int argc, char *argv[])
 
 	cfgreg_unlock();
 
+	/* Some options are forbidden in 68000 mode. */
+	if (cpu_68k_get()) {
+		if (!arg_switch_isempty(MOREMEM_ARG)) {
+			printf("MOREMEM cannot be used in 68000 mode!\n");
+			return EXIT_SYNTAX_ERROR;	
+		}
+		if (!arg_switch_isempty(PCMCIA2RAM_ARG)) {
+			printf("PCMCIA2RAM cannot be used in 68000 mode!\n");
+			return EXIT_SYNTAX_ERROR;
+		}
+		if (!arg_toggle_isempty(MAPROM_ARG)) {
+			printf("MAPROM cannot be used in 68000 mode!\n");
+			return EXIT_SYNTAX_ERROR;
+		}
+		if (!arg_toggle_isempty(SHADOWROM_ARG)) {
+			printf("SHADOWROM cannot be used in 68000 mode!\n");
+			return EXIT_SYNTAX_ERROR;
+		}	
+	}
+
 	/* MAPROM ON only if LOADROM passed. */
-	if ((LONG) argArray[MAPROM_ARG] == TOGGLE_TRUE) {
-		if ((LONG) argArray[LOADROM_ARG] == 0) {
-			printf("MAPROM ON must be used with LOADROM!\n");
-		} else 
-			maprom_enable((STRPTR) argArray[LOADROM_ARG]);
-	} else if ((LONG) argArray[MAPROM_ARG] == TOGGLE_FALSE) {
-		maprom_disable();
+	if (!arg_toggle_isempty(MAPROM_ARG)) {
+		if (arg_toggle_val(MAPROM_ARG)) 
+			if (arg_key_isempty(LOADROM_ARG))
+				printf("MAPROM ON must be used with LOADROM!\n");
+			else 
+				maprom_enable((STRPTR) argArray[LOADROM_ARG]);
+		else
+			maprom_disable();
 	}
 
-	if ((LONG) argArray[SHADOWROM_ARG] == TOGGLE_TRUE) {
-		shadowrom_enable();
-	} else if ((LONG) argArray[SHADOWROM_ARG] == TOGGLE_FALSE) {
-		shadowrom_disable();
+	if (!arg_toggle_isempty(SHADOWROM_ARG)) {
+		if (arg_toggle_val(SHADOWROM_ARG)) 
+			shadowrom_enable();
+		else
+			shadowrom_disable();
 	}
 
-	if ( ((LONG) argArray[MOREMEM_ARG] != 0))
+	if (!arg_switch_isempty(MOREMEM_ARG))
 	{
 #ifdef DEBUG
 		printf("DEBUG: MOREMEM arugment passed\n");
 #endif /* DEBUG */
+		/* only if not running in 68000 mode */	
 		memory_add_misc();
 	}
 
-	if ((LONG) argArray[MODE68K_ARG] == TOGGLE_TRUE) {
-		cpu_68k_enable();
-	} else if ((LONG) argArray[MODE68K_ARG] == TOGGLE_FALSE) {
-		cpu_68k_disable();
+	if (!arg_toggle_isempty(MODE68K_ARG)) {
+		if (arg_toggle_val(MODE68K_ARG)) 
+			cpu_68k_enable();
+		else 
+			cpu_68k_disable();
 	}
 
-	if ((LONG) argArray[MODE68KMEMORY_ARG] == TOGGLE_TRUE) {
-		cpu_68kfast_enable();
-	} else if ((LONG) argArray[MODE68KMEMORY_ARG] == TOGGLE_FALSE) {
-		cpu_68kfast_disable();
+	if (!arg_toggle_isempty(MODE68KMEMORY_ARG)) {
+		if (arg_toggle_val(MODE68KMEMORY_ARG)) 
+			cpu_68kfast_enable();
+		else
+			cpu_68kfast_disable();
 	}
 
-	if ((LONG) argArray[PCMCIA2RAM_ARG] != 0) {
+	if (!arg_switch_isempty(PCMCIA2RAM_ARG)) {
 		pcmcia2ram_enable();
 		memory_add_4m();
 	}
 
-	if ((LONG) argArray[INSTCACHE_ARG] == TOGGLE_TRUE) {
-		instcache_enable();
-	} else if ((LONG) argArray[INSTCACHE_ARG] == TOGGLE_FALSE) {
-		instcache_disable();
+	if (!arg_toggle_isempty(INSTCACHE_ARG)) {
+		if (arg_toggle_val(INSTCACHE_ARG)) 
+			instcache_enable();
+		else
+			instcache_disable();
 	}
 
-	if ((LONG) argArray[REBOOT_ARG] != 0) {
+	if (!arg_switch_isempty) {
 		reboot();
 	}
 
