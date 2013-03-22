@@ -197,18 +197,22 @@ main(int argc, char *argv[])
 	if (cpu_68k_get()) {
 		if (!arg_switch_isempty(MOREMEM_ARG)) {
 			printf("MOREMEM cannot be used in 68000 mode!\n");
+			cfgreg_lock();
 			return EXIT_SYNTAX_ERROR;	
 		}
 		if (!arg_switch_isempty(PCMCIA2RAM_ARG)) {
 			printf("PCMCIA2RAM cannot be used in 68000 mode!\n");
+			cfgreg_lock();
 			return EXIT_SYNTAX_ERROR;
 		}
 		if (!arg_toggle_isempty(MAPROM_ARG)) {
 			printf("MAPROM cannot be used in 68000 mode!\n");
+			cfgreg_lock();
 			return EXIT_SYNTAX_ERROR;
 		}
 		if (!arg_toggle_isempty(SHADOWROM_ARG)) {
 			printf("SHADOWROM cannot be used in 68000 mode!\n");
+			cfgreg_lock();
 			return EXIT_SYNTAX_ERROR;
 		}	
 	}
@@ -266,7 +270,7 @@ main(int argc, char *argv[])
 			instcache_disable();
 	}
 
-	if (!arg_switch_isempty) {
+	if (!arg_switch_isempty(REBOOT_ARG)) {
 		reboot();
 	}
 
