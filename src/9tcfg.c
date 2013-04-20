@@ -29,7 +29,7 @@ void status_print_reg_inv(UBYTE reg, UBYTE bit);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.4 (19.04.2013)\0";
+static const STRPTR version = "\0$VER: 9tcfg 0.5 (20.04.2013)\0";
 static const STRPTR id = "\0$Id$\0";
 
 static LONG *argArray;	/* arguments passed on the command line */
