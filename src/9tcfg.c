@@ -75,8 +75,8 @@ status_display(void)
 	printf("\t68000 mode status: ");
 	status_print_reg(r2, CFG_R2_68KMODE_STATUS);
 
-	printf("\tPCMCIA2RAM mode (add 4MB RAM, disable PCMCIA): ");
-	status_print_reg(r0, CFG_R0_PCMCIA2RAM);
+	printf("\tPCMCIA mode (4MB RAM): ");
+	status_print_reg(r0, CFG_R0_PCMCIA);
 
 	printf("\tInstruction cache: ");
 	status_print_reg_inv(r1, CFG_R1_INSTCACHEOFF);
@@ -150,12 +150,12 @@ main(int argc, char *argv[])
 	 */
 	struct RDArgs *result;
 	CONST_STRPTR argTemplate =
-	    "MODE68K/T,MODE68KMEMORY/T,PCMCIA2RAM/S,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S";
+	    "MODE68K/T,MODE68KMEMORY/T,PCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S";
 #define ARGNUM		10	
 
 #define MODE68K_ARG	0
 #define MODE68KMEMORY_ARG 1
-#define PCMCIA2RAM_ARG	2
+#define PCMCIA_ARG	2
 #define MAPROM_ARG	3
 #define SHADOWROM_ARG	4	
 #define LOADROM_ARG	5	
@@ -200,8 +200,8 @@ main(int argc, char *argv[])
 			cfgreg_lock();
 			return EXIT_SYNTAX_ERROR;	
 		}
-		if (!arg_switch_isempty(PCMCIA2RAM_ARG)) {
-			printf("PCMCIA2RAM cannot be used in 68000 mode!\n");
+		if (!arg_switch_isempty(PCMCIA_ARG)) {
+			printf("PCMCIA is always available in 68000 mode!\n");
 			cfgreg_lock();
 			return EXIT_SYNTAX_ERROR;
 		}
@@ -258,9 +258,11 @@ main(int argc, char *argv[])
 			cpu_68kfast_disable();
 	}
 
-	if (!arg_switch_isempty(PCMCIA2RAM_ARG)) {
-		pcmcia2ram_enable();
-		memory_add_4m();
+	if (!arg_toggle_isempty(PCMCIA_ARG)) {
+		if (arg_toggle_val(PCMCIA_ARG)) 
+			pcmcia_enable();
+		else
+			pcmcia_disable();
 	}
 
 	if (!arg_toggle_isempty(INSTCACHE_ARG)) {

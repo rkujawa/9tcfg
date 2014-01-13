@@ -9,7 +9,7 @@
 .Nm
 .Op MODE68K/T
 .Op MODE68KMEMORY/T 
-.Op PCMCIA2RAM/S
+.Op PCMCIA/T
 .Op MAPROM/T
 .Op SHADOWROM/T 
 .Op LOADROM/K 
@@ -30,8 +30,8 @@ command takes the following flags and arguments:
 68000 mode + Fast RAM - as above but with 5.5MB of Fast (off by default).
 .It INSTCACHE/T 
 Turn off/on instruction cache (on by default).
-.It PCMCIA2RAM/S
-Disable PCMCIA access, add additional 4MB of RAM.
+.It PCMCIA/T
+Enable PCMCIA access, configure only 4MB of RAM.
 .It MAPROM/T
 Enable/disable the MAPROM function, must be used with LOADROM/K (off by default).
 .It SHADOWROM/T 
