@@ -167,6 +167,7 @@ main(int argc, char *argv[])
 
 	argArray[MODE68K_ARG] = TOGGLE_EMPTY;
 	argArray[MODE68KMEMORY_ARG] = TOGGLE_EMPTY;
+	argArray[PCMCIA_ARG] = TOGGLE_EMPTY;
 	argArray[MAPROM_ARG] = TOGGLE_EMPTY;
 	argArray[SHADOWROM_ARG] = TOGGLE_EMPTY;
 	argArray[INSTCACHE_ARG] = TOGGLE_EMPTY;
