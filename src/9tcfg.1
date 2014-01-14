@@ -7,8 +7,8 @@
 .Nd Ninetails accelerator configuration program 
 .Sh SYNOPSIS
 .Nm
-.Op MODE68K/T
-.Op MODE68KMEMORY/T 
+.Op M68K/T
+.Op M68KMEM/T 
 .Op PCMCIA/T
 .Op MAPROM/T
 .Op SHADOWROM/T 
@@ -24,9 +24,9 @@ The
 .Nm
 command takes the following flags and arguments:
 .Bl -tag -width
-.It MODE68K/T
+.It M68K/T
 68000 mode - disable/enable the 68020 processor after next reboot (off by default).
-.It MODE68KMEMORY/T
+.It M68KMEM/T
 68000 mode + Fast RAM - as above but with 5.5MB of Fast (off by default).
 .It INSTCACHE/T 
 Turn off/on instruction cache (on by default).
