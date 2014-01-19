@@ -10,7 +10,6 @@
 #include <proto/dos.h>
 #include <proto/exec.h>
 
-#include "config.h"
 #include "hardware.h"
 #include "addmem.h"
 #include "cfgreg.h"
@@ -29,10 +28,12 @@ void status_print_reg_inv(UBYTE reg, UBYTE bit);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.6 (13.01.2014)\0";
+static const STRPTR version = "\0$VER: 9tcfg 0.7 (19.01.2014)\0";
 static const STRPTR id = "\0$Id$\0";
 
 static LONG *argArray;	/* arguments passed on the command line */
+
+BOOL debug = FALSE;
 
 /* -- implementation -- */
 
@@ -112,11 +113,10 @@ arg_toggle_val(UBYTE argNo)
 		return 1;
 	else if ((LONG) argArray[argNo] == TOGGLE_FALSE)
 		return 0;
-#ifdef DEBUG
-	else
-		/* I wonder if we'll observe one of these, duh. */
+/*	else
+		// I wonder if we'll observe one of these, duh. 
 		printf("DEBUG: toggle neither TRUE nor FALSE, this should not happen!\n");
-#endif /* DEBUG */
+*/
 
 	return 0;
 }
@@ -150,8 +150,8 @@ main(int argc, char *argv[])
 	 */
 	struct RDArgs *result;
 	CONST_STRPTR argTemplate =
-	    "M68K/T,M68KMEM/T,PCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S";
-#define ARGNUM		10	
+	    "M68K/T,M68KMEM/T,PCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S,DEBUG/S";
+#define ARGNUM		11
 
 #define MODE68K_ARG	0
 #define MODE68KMEMORY_ARG 1
@@ -162,6 +162,7 @@ main(int argc, char *argv[])
 #define MOREMEM_ARG	6
 #define INSTCACHE_ARG	7
 #define REBOOT_ARG	8
+#define DEBUG_ARG	9
 
 	argArray = AllocVec(ARGNUM*sizeof(LONG), MEMF_ANY|MEMF_CLEAR);
 
@@ -173,6 +174,10 @@ main(int argc, char *argv[])
 	argArray[INSTCACHE_ARG] = TOGGLE_EMPTY;
 
 	result = ReadArgs(argTemplate, argArray, NULL);
+
+	if (!arg_switch_isempty(DEBUG_ARG)) {
+		debug = TRUE; 
+	}
 
 	/* 
 	 * Some RURUs for correct usage of this program...
@@ -238,9 +243,9 @@ main(int argc, char *argv[])
 
 	if (!arg_switch_isempty(MOREMEM_ARG))
 	{
-#ifdef DEBUG
+/*
 		printf("DEBUG: MOREMEM arugment passed\n");
-#endif /* DEBUG */
+*/
 		/* only if not running in 68000 mode */	
 		memory_add_misc();
 	}

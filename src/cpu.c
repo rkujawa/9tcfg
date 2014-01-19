@@ -4,7 +4,6 @@
 
 #include <exec/types.h>
 
-#include "config.h"
 #include "hardware.h"
 #include "cfgreg.h"
 #include "cpu.h"

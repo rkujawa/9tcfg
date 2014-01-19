@@ -3,12 +3,14 @@
 
 #include <exec/types.h>
 
+#include "cfgreg.h"
 #include "hardware.h"
-#include "config.h"
 
 #pragma dontwarn 113
 
 static UBYTE *cardaddr = CFG_ADDRESS;
+
+extern debug;
 
 /* read register at offset */
 UBYTE
@@ -19,9 +21,8 @@ cfgreg_read(UBYTE offset)
 
 	ptr = cardaddr + offset;
 	v = *ptr;
-#ifdef DEBUG
-	printf("DEBUG: read %x from %p\n", (int) v, (void*) ptr);
-#endif /* DEBUG */
+	if (debug)
+		printf("DEBUG: read %x from %p\n", (int) v, (void*) ptr);
 
 	return v & CFG_RX_MASK;	/* Mask out pins not tied to CPLD. */
 }
@@ -33,9 +34,8 @@ cfgreg_write(UBYTE offset, UBYTE value)
 	UBYTE *ptr;
 
 	ptr = cardaddr + offset;
-#ifdef DEBUG
-	printf("DEBUG: write %x to %p\n", (int) value, (void*) ptr);
-#endif /* DEBUG */
+	if (debug)
+		printf("DEBUG: write %x to %p\n", (int) value, (void*) ptr);
 	*ptr = value;
 }
 
@@ -62,9 +62,9 @@ cfgreg_unset(UBYTE offset, UBYTE bits)
 void
 cfgreg_unlock(void) 
 {
-#ifdef DEBUG
-	printf("DEBUG: unlocking registers\n");
-#endif /* DEBUG */
+	if (debug)
+		printf("DEBUG: unlocking registers\n");
+
 	/* reset the FSM */
 	cfgreg_write(CFG_LOCK0_OFFSET, 0);
 
@@ -78,9 +78,9 @@ cfgreg_unlock(void)
 void
 cfgreg_lock(void)
 {
-#ifdef DEBUG
-	printf("DEBUG: locking registers\n");
-#endif /* DEBUG */
+	if (debug)
+		printf("DEBUG: locking registers\n");
+
 	cfgreg_write(CFG_LOCK0_OFFSET, 0);
 }
 
@@ -88,9 +88,10 @@ BYTE
 ninetails_detect(void)
 {
 	UBYTE l0, l1, l2, l3;
-#ifdef DEBUG
-	printf("DEBUG: running detection procedure\n");
-#endif /* DEBUG */
+
+	if (debug)
+		printf("DEBUG: running detection procedure\n");
+
 	l0 = cfgreg_read(CFG_LOCK0_OFFSET) & CFG_LOCK_ID_MASK;	
 	l1 = cfgreg_read(CFG_LOCK1_OFFSET) & CFG_LOCK_ID_MASK;	
 	l2 = cfgreg_read(CFG_LOCK2_OFFSET) & CFG_LOCK_ID_MASK;	

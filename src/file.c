@@ -9,7 +9,8 @@
 #include <proto/exec.h>
 
 #include "file.h"
-#include "config.h"
+
+extern debug;
 
 /* get file size */
 ULONG
@@ -35,9 +36,8 @@ file_size(BYTE *path)
 	if (file = Lock(path, SHARED_LOCK)) {
 
 		if (Examine(file, fib)) {
-#ifdef DEBUG
-			printf("DEBUG: Examine() returns file size %lx\n", fib->fib_Size);
-#endif /* DEBUG */
+			if (debug)
+				printf("DEBUG: Examine() returns file size %lx\n", fib->fib_Size);
 		} else {
 			printf("Couldn't Examine() file!\n"); /* XXX */
 		}
@@ -65,9 +65,8 @@ file_load(BYTE *path, BYTE *filebuf, ULONG filesize)
 		return 0;
 	}
 
-#ifdef DEBUG
-	printf("DEBUG: loading %lx bytes long file at %p\n", (ULONG) filesize, (void*) filebuf);
-#endif /* DEBUG */
+	if (debug)
+		printf("DEBUG: loading %lx bytes long file at %p\n", (ULONG) filesize, (void*) filebuf);
 
 	if (Read(fh, filebuf, filesize) == -1) {
 		perror("Error reading file");

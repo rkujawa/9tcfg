@@ -5,10 +5,11 @@
 #include <proto/exec.h>
 
 #include "hardware.h"
-#include "config.h"
 #include "addmem.h"
 
 #pragma dontwarn 113 
+
+extern debug;
 
 /* add 4MB of memory between 0x600000 and 0x9FFFFF */
 void
@@ -38,9 +39,8 @@ memory_check_added(ULONG address)
 	for (m  = (void *) SysBase->MemList.lh_Head;
 	    nm = (void *) m->mh_Node.ln_Succ; m = nm) {
 		if (address == ( (ULONG) m->mh_Lower & 0xFFFF00)) {
-#ifdef DEBUG
-			printf("DEBUG: memory at address %p already added\n", (void*) address);
-#endif /* DEBUG */
+			if (debug)
+				printf("DEBUG: memory at address %p already added\n", (void*) address);
 			return 1;
 		}
 	}

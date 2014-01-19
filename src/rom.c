@@ -2,10 +2,11 @@
 
 #include <exec/types.h>
 
-#include "config.h"
 #include "rom.h"
 #include "hardware.h"
 #include "file.h"
+
+extern debug;
 
 BOOL rom_copy_self(BYTE *rombuf, ULONG romsize);
 
@@ -71,9 +72,8 @@ bank_bits2num(uint8_t r1)
 void
 bank_select(uint8_t banknum)
 {
-#ifdef DEBUG
-	printf("DEBUG: changing to bank %d\n", (int) banknum);
-#endif 
+	if (debug)
+		printf("DEBUG: changing to bank %d\n", (int) banknum);
 
 	// XXX: this could be implemented with one set/unset operation 
 
@@ -92,8 +92,8 @@ bank_select(uint8_t banknum)
 void
 bank_copy(uint32_t address)
 {
-#ifdef DEBUG
-	printf("DEBUG: copying 256kB block from %x to %x\n", address, MAPROM_BANK_ADDRESS);
+	if (debug)
+		printf("DEBUG: copying 256kB block from %x to %x\n", address, MAPROM_BANK_ADDRESS);
 #endif 
 
 	memcpy((void*) MAPROM_BANK_ADDRESS, (void*) address, 256*1024);	
@@ -165,21 +165,18 @@ maprom_enable(BYTE *path)
 		return;
 	}
 
-#ifdef DEBUG
-	printf("DEBUG: will load ROM from %s\n", path);
-#endif /* DEBUG */
+	if (debug)
+		printf("DEBUG: will load ROM from %s\n", path);
 
 	romsize = file_size(path);
 
-#ifdef DEBUG
-	printf("DEBUG: m'kay so apparanetly loaded ROM has size: %lx\n", romsize);
-#endif /* DEBUG */
+	if (debug)
+		printf("DEBUG: m'kay so apparanetly loaded ROM has size: %lx\n", romsize);
 
 	rombuf = (char*) malloc(romsize);
 
-#ifdef DEBUG
-	printf("DEBUG: allocated %x bytes at address %p, ready to load data\n", (unsigned int) romsize, (void*) rombuf);
-#endif /* DEBUG */
+	if (debug)
+		printf("DEBUG: allocated %x bytes at address %p, ready to load data\n", (unsigned int) romsize, (void*) rombuf);
 
 	file_load(path, rombuf, romsize);
 
