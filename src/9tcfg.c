@@ -67,16 +67,16 @@ status_display(void)
 
 	printf(" ==================== CPU / Memory options ==================== \n");
 
-	printf("\t68000 mode at next reset: ");
+	printf("\tEnable MC68000 after reset: ");
 	status_print_reg(r0, CFG_R0_68KMODE);
 
-	printf("\t5.5MB Fast if 68000 active at next reset: ");
+	printf("\tEnable 16bit FastRAM after reset if MC68000 is enabled: ");
 	status_print_reg(r0, CFG_R0_68KMEMORYMODE);
 
-	printf("\t68000 mode status: ");
+	printf("\tMC68000 status: ");
 	status_print_reg(r2, CFG_R2_68KMODE_STATUS);
 
-	printf("\tPCMCIA mode (4MB RAM): ");
+	printf("\tPCMCIA Friendly (4MB RAM) after reset: ");
 	status_print_reg(r0, CFG_R0_PCMCIA);
 
 	printf("\tInstruction cache: ");
