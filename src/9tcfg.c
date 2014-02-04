@@ -206,7 +206,7 @@ main(int argc, char *argv[])
 			cfgreg_lock();
 			return EXIT_SYNTAX_ERROR;	
 		}
-		if (!arg_switch_isempty(PCMCIA_ARG)) {
+		if (!arg_toggle_isempty(PCMCIA_ARG)) {
 			printf("PCMCIA is always available in 68000 mode!\n");
 			cfgreg_lock();
 			return EXIT_SYNTAX_ERROR;
