@@ -70,7 +70,7 @@ status_display(void)
 	printf("\tEnable MC68000 after reset: ");
 	status_print_reg(r0, CFG_R0_68KMODE);
 
-	printf("\tEnable 16bit FastRAM after reset if MC68000 is enabled: ");
+	printf("\tEnable 16bit FastRAM after reset: ");
 	status_print_reg(r0, CFG_R0_68KMEMORYMODE);
 
 	printf("\tMC68000 status: ");
@@ -92,6 +92,32 @@ status_display(void)
 
 	printf("\tShadow ROM: ");
 	status_print_reg(r1, CFG_R1_SHADOWROM);
+}
+
+void
+help(void) 
+{
+
+
+	printf("9tcfg     - Ninetails accelerator config tool by R.Kujawa \n\n");
+	printf("M68K      - turn off accelerator (on/off) \n");
+	printf("M68KMEM   - enable 5.5MB 16bit FastRam, available when M68K is ON (ON/OFF)\n");
+	printf("PCMCIA    - sacrifice 4MB of fastram (600000-9FFFFF) for PCMCIA sake (ON/OFF)\n");
+	printf("SHADOWROM - copy onboard kickstart to reserved RAM for shadowing (ON/OFF) \n");
+	printf("MAPROM    - enable mapping of loaded kickstart file, use with LOADROM (ON/OFF)  \n");
+	printf("LOADROM   - load kickstart file to reserved RAM (1MB is supported) \n");
+	printf("MOREMEM   - add more memory to system pool (A80000-B7FFFF, F00000-F7FFFF)  \n");
+	printf("INSTCACHE - disable/enable instruction cache for MC68EC020 (ON/OFF)\n");
+	printf("REBOOT    - die and rise from ashes \n");
+	printf("DEBUG     - display informations useful only for developers \n");
+	printf(" \n\n");
+	printf("Example: \n");
+	printf("9tcfg maprom on loadrom=ks3.9.rom moremem pcmcia on reboot \n");
+	printf(" \n");
+	
+	
+
+
 }
 
 BOOL
@@ -150,8 +176,8 @@ main(int argc, char *argv[])
 	 */
 	struct RDArgs *result;
 	CONST_STRPTR argTemplate =
-	    "M68K/T,M68KMEM/T,PCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S,DEBUG/S";
-#define ARGNUM		11
+	    "M68K/T,M68KMEM/T,PCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S,DEBUG/S,HELP/S";
+#define ARGNUM		12
 
 #define MODE68K_ARG	0
 #define MODE68KMEMORY_ARG 1
@@ -163,6 +189,7 @@ main(int argc, char *argv[])
 #define INSTCACHE_ARG	7
 #define REBOOT_ARG	8
 #define DEBUG_ARG	9
+#define HELP_ARG	10
 
 	argArray = AllocVec(ARGNUM*sizeof(LONG), MEMF_ANY|MEMF_CLEAR);
 
