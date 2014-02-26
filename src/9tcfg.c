@@ -309,7 +309,10 @@ main(int argc, char *argv[])
 		reboot();
 	}
 
-	status_display();
+	/* Display status only if no arguments were given. */
+	if (argc == 1) {
+		status_display();
+	}
 
 	cfgreg_lock();
 
