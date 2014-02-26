@@ -28,7 +28,7 @@ void status_print_reg_inv(UBYTE reg, UBYTE bit);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.7 (19.01.2014)\0";
+static const STRPTR version = "\0$VER: 9tcfg 0.8 (26.02.2014)\0";
 static const STRPTR id = "\0$Id$\0";
 
 static LONG *argArray;	/* arguments passed on the command line */
@@ -97,26 +97,21 @@ status_display(void)
 void
 help(void) 
 {
-
-
-	printf("9tcfg     - Ninetails accelerator config tool by R.Kujawa \n\n");
-	printf("M68K      - turn off accelerator (on/off) \n");
+	printf("9tcfg     - Ninetails accelerator config tool by R. Kujawa\n\n");
+	printf("M68K      - turn off accelerator (on/off)\n");
 	printf("M68KMEM   - enable 5.5MB 16bit FastRam, available when M68K is ON (ON/OFF)\n");
 	printf("PCMCIA    - sacrifice 4MB of fastram (600000-9FFFFF) for PCMCIA sake (ON/OFF)\n");
-	printf("SHADOWROM - copy onboard kickstart to reserved RAM for shadowing (ON/OFF) \n");
-	printf("MAPROM    - enable mapping of loaded kickstart file, use with LOADROM (ON/OFF)  \n");
-	printf("LOADROM   - load kickstart file to reserved RAM (1MB is supported) \n");
-	printf("MOREMEM   - add more memory to system pool (A80000-B7FFFF, F00000-F7FFFF)  \n");
+	printf("SHADOWROM - copy onboard kickstart to reserved RAM for shadowing (ON/OFF)\n");
+	printf("MAPROM    - enable mapping of loaded kickstart file, use with LOADROM (ON/OFF)\n");
+	printf("LOADROM   - load kickstart file to reserved RAM (1MB is supported)\n");
+	printf("MOREMEM   - add more memory to system pool (A80000-B7FFFF, F00000-F7FFFF)\n");
 	printf("INSTCACHE - disable/enable instruction cache for MC68EC020 (ON/OFF)\n");
 	printf("REBOOT    - die and rise from ashes \n");
-	printf("DEBUG     - display informations useful only for developers \n");
-	printf(" \n\n");
-	printf("Example: \n");
-	printf("9tcfg maprom on loadrom=ks3.9.rom moremem pcmcia on reboot \n");
-	printf(" \n");
-	
-	
-
+	printf("DEBUG     - display informations useful only for developers\n");
+	printf("\n\n");
+	printf("Example:\n");
+	printf("9tcfg MAPROM ON LOADROM=ks3.9.rom MOREMEM PCMCIA ON REBOOT\n");
+	printf("\n");
 
 }
 
@@ -204,6 +199,11 @@ main(int argc, char *argv[])
 
 	if (!arg_switch_isempty(DEBUG_ARG)) {
 		debug = TRUE; 
+	}
+
+	if (!arg_switch_isempty(HELP_ARG)) {
+		help();
+		return 0;
 	}
 
 	/* 
