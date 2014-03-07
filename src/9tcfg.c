@@ -29,7 +29,7 @@ void status_print_reg_inv(UBYTE reg, UBYTE bit);
 /* -- global variables -- */
 
 static const STRPTR version = "\0$VER: 9tcfg 0.8 (26.02.2014)\0";
-static const STRPTR id = "\0$Id$\0";
+static const STRPTR id = "\0$Id: e19ce4b2cb22f1786310c015c489de9801d37cd6 $\0";
 
 static LONG *argArray;	/* arguments passed on the command line */
 
@@ -67,16 +67,13 @@ status_display(void)
 
 	printf(" ==================== CPU / Memory options ==================== \n");
 
-	printf("\tEnable MC68000 after reset: ");
+	printf("\tEnable MC68000 (reset): ");
 	status_print_reg(r0, CFG_R0_68KMODE);
-
-	printf("\tEnable 16bit FastRAM after reset: ");
-	status_print_reg(r0, CFG_R0_68KMEMORYMODE);
 
 	printf("\tMC68000 status: ");
 	status_print_reg(r2, CFG_R2_68KMODE_STATUS);
 
-	printf("\tPCMCIA Friendly (4MB RAM) after reset: ");
+	printf("\tPCMCIA Friendly - 4MB FastRam(reset): ");
 	status_print_reg(r0, CFG_R0_PCMCIA);
 
 	printf("\tInstruction cache: ");
@@ -97,12 +94,12 @@ status_display(void)
 void
 help(void) 
 {
+	printf("\n");
 	printf("9tcfg     - Ninetails accelerator config tool by R. Kujawa\n\n");
 	printf("M68K      - turn off accelerator (on/off)\n");
-	printf("M68KMEM   - enable 5.5MB 16bit FastRam, available when M68K is ON (ON/OFF)\n");
-	printf("PCMCIA    - sacrifice 4MB of fastram (600000-9FFFFF) for PCMCIA sake (ON/OFF)\n");
-	printf("SHADOWROM - copy onboard kickstart to reserved RAM for shadowing (ON/OFF)\n");
-	printf("MAPROM    - enable mapping of loaded kickstart file, use with LOADROM (ON/OFF)\n");
+	printf("PCMCIA    - sacrifice 4MB of fastram for PCMCIA sake (ON/OFF)\n");
+	printf("SHADOWROM - kickstart shadowing (ON/OFF)\n");
+	printf("MAPROM    - enable maprom, use with LOADROM (ON/OFF)\n");
 	printf("LOADROM   - load kickstart file to reserved RAM (1MB is supported)\n");
 	printf("MOREMEM   - add more memory to system pool (A80000-B7FFFF, F00000-F7FFFF)\n");
 	printf("INSTCACHE - disable/enable instruction cache for MC68EC020 (ON/OFF)\n");
@@ -171,25 +168,25 @@ main(int argc, char *argv[])
 	 */
 	struct RDArgs *result;
 	CONST_STRPTR argTemplate =
-	    "M68K/T,M68KMEM/T,PCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S,DEBUG/S,HELP/S";
-#define ARGNUM		12
+	    "M68K/T,PCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S,DEBUG/S,HELP/S";
+#define ARGNUM		11
 
 #define MODE68K_ARG	0
-#define MODE68KMEMORY_ARG 1
-#define PCMCIA_ARG	2
-#define MAPROM_ARG	3
-#define SHADOWROM_ARG	4	
-#define LOADROM_ARG	5	
-#define MOREMEM_ARG	6
-#define INSTCACHE_ARG	7
-#define REBOOT_ARG	8
-#define DEBUG_ARG	9
-#define HELP_ARG	10
+/*#define MODE68KMEMORY_ARG 1 */
+#define PCMCIA_ARG	1
+#define MAPROM_ARG	2
+#define SHADOWROM_ARG	3	
+#define LOADROM_ARG	4	
+#define MOREMEM_ARG	5
+#define INSTCACHE_ARG	6
+#define REBOOT_ARG	7
+#define DEBUG_ARG	8
+#define HELP_ARG	9
 
 	argArray = AllocVec(ARGNUM*sizeof(LONG), MEMF_ANY|MEMF_CLEAR);
 
 	argArray[MODE68K_ARG] = TOGGLE_EMPTY;
-	argArray[MODE68KMEMORY_ARG] = TOGGLE_EMPTY;
+/*	argArray[MODE68KMEMORY_ARG] = TOGGLE_EMPTY; */
 	argArray[PCMCIA_ARG] = TOGGLE_EMPTY;
 	argArray[MAPROM_ARG] = TOGGLE_EMPTY;
 	argArray[SHADOWROM_ARG] = TOGGLE_EMPTY;
@@ -220,7 +217,7 @@ main(int argc, char *argv[])
 	if (hwrev == -1) {
 		printf("Ninetails board not detected!\n");
 		return EXIT_HARDWARE_ERROR;
-	} else {
+	} else if(argc == 1) {
 		printf("Ninetails revision %d\n", hwrev);
 	}
 
@@ -284,12 +281,12 @@ main(int argc, char *argv[])
 			cpu_68k_disable();
 	}
 
-	if (!arg_toggle_isempty(MODE68KMEMORY_ARG)) {
+/*	if (!arg_toggle_isempty(MODE68KMEMORY_ARG)) {
 		if (arg_toggle_val(MODE68KMEMORY_ARG)) 
 			cpu_68kfast_enable();
 		else
 			cpu_68kfast_disable();
-	}
+	} */
 
 	if (!arg_toggle_isempty(PCMCIA_ARG)) {
 		if (arg_toggle_val(PCMCIA_ARG)) 
