@@ -28,12 +28,13 @@ void status_print_reg_inv(UBYTE reg, UBYTE bit);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 0.8 (26.02.2014)\0";
-static const STRPTR id = "\0$Id: e19ce4b2cb22f1786310c015c489de9801d37cd6 $\0";
+static const STRPTR version = "\0$VER: 9tcfg 0.9 (13.03.2014)\0";
+static const STRPTR id = "\0$Id$\0";
 
 static LONG *argArray;	/* arguments passed on the command line */
 
 BOOL debug = FALSE;
+BYTE hwrev;
 
 /* -- implementation -- */
 
@@ -65,29 +66,30 @@ status_display(void)
 	r1 = cfgreg_read(CFG_R1_OFFSET);
 	r2 = cfgreg_read(CFG_R2_OFFSET);
 
+	printf("\tNinetails revision:\t\t\t%d\n", hwrev);
 	printf(" ==================== CPU / Memory options ==================== \n");
 
-	printf("\tEnable MC68000 (reset): ");
+	printf("\tEnable MC68000 mode (reset):\t\t");
 	status_print_reg(r0, CFG_R0_68KMODE);
 
-	printf("\tMC68000 status: ");
+	printf("\tMC68000 mode status:\t\t\t");
 	status_print_reg(r2, CFG_R2_68KMODE_STATUS);
 
-	printf("\tPCMCIA Friendly - 4MB FastRam(reset): ");
+	printf("\tPCMCIA friendly - 4MB Fast RAM (reset):\t");
 	status_print_reg(r0, CFG_R0_PCMCIA);
 
-	printf("\tInstruction cache: ");
+	printf("\tMC68EC020 instruction cache:\t\t");
 	status_print_reg_inv(r1, CFG_R1_INSTCACHEOFF);
 	
 	printf(" ========================= ROM options ======================== \n");
 
-	printf("\tMAPROM at next reset: ");
+	printf("\tMAPROM at next reset:\t\t\t");
 	status_print_reg(r1, CFG_R1_MAPROM);
 
-	printf("\tMAPROM status: ");
+	printf("\tMAPROM status:\t\t\t\t");
 	status_print_reg(r2, CFG_R2_MAPROM_STATUS);
 
-	printf("\tShadow ROM: ");
+	printf("\tShadow ROM:\t\t\t\t");
 	status_print_reg(r1, CFG_R1_SHADOWROM);
 }
 
@@ -96,15 +98,16 @@ help(void)
 {
 	printf("\n");
 	printf("9tcfg     - Ninetails accelerator config tool by R. Kujawa\n\n");
-	printf("M68K      - turn off accelerator (on/off)\n");
-	printf("PCMCIA    - sacrifice 4MB of fastram for PCMCIA sake (ON/OFF)\n");
-	printf("SHADOWROM - kickstart shadowing (ON/OFF)\n");
-	printf("MAPROM    - enable maprom, use with LOADROM (ON/OFF)\n");
-	printf("LOADROM   - load kickstart file to reserved RAM (1MB is supported)\n");
-	printf("MOREMEM   - add more memory to system pool (A80000-B7FFFF, F00000-F7FFFF)\n");
-	printf("INSTCACHE - disable/enable instruction cache for MC68EC020 (ON/OFF)\n");
-	printf("REBOOT    - die and rise from ashes \n");
-	printf("DEBUG     - display informations useful only for developers\n");
+	printf("\n");
+	printf("M68K      - MC68000 mode - turn off accelerator (ON/OFF)\n");
+	printf("PCMCIA    - Sacrifice 4MB of Fast RAM for PCMCIA sake (ON/OFF)\n");
+	printf("SHADOWROM - Kickstart shadowing (ON/OFF)\n");
+	printf("MAPROM    - Enable MAPROM, use with LOADROM (ON/OFF)\n");
+	printf("LOADROM   - Load kickstart file to reserved RAM (up to 1MB supported)\n");
+	printf("MOREMEM   - Add more memory to system pool (A80000-B7FFFF, F00000-F7FFFF)\n");
+	printf("INSTCACHE - Instruction cache enable/disable for MC68EC020 (ON/OFF)\n");
+	printf("REBOOT    - Die and rise from ashes \n");
+	printf("DEBUG     - Display informations useful only for developers\n");
 	printf("\n\n");
 	printf("Example:\n");
 	printf("9tcfg MAPROM ON LOADROM=ks3.9.rom MOREMEM PCMCIA ON REBOOT\n");
@@ -160,8 +163,6 @@ arg_toggle_isempty(UBYTE argNo)
 int
 main(int argc, char *argv[])
 {
-	BYTE hwrev; /* hardware revision */
-
 	/*
 	 * AmigaOS ReadArgs-style argument parsing is an inconsistent shit.
 	 * Pile of shit. Period.
@@ -215,10 +216,8 @@ main(int argc, char *argv[])
 	hwrev = ninetails_detect();
 
 	if (hwrev == -1) {
-		printf("Ninetails board not detected!\n");
+		printf("Ninetails board not detected! :(\n");
 		return EXIT_HARDWARE_ERROR;
-	} else if(argc == 1) {
-		printf("Ninetails revision %d\n", hwrev);
 	}
 
 	cfgreg_unlock();
