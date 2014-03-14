@@ -98,7 +98,7 @@ help(void)
 {
 	printf("\n");
 	printf("9tcfg     - Ninetails accelerator config tool by R. Kujawa\n\n");
-	printf("\n");
+	printf("Possible ARGS:\n");
 	printf("M68K      - MC68000 mode - turn off accelerator (ON/OFF)\n");
 	printf("PCMCIA    - Sacrifice 4MB of Fast RAM for PCMCIA sake (ON/OFF)\n");
 	printf("SHADOWROM - Kickstart shadowing (ON/OFF)\n");
@@ -111,6 +111,7 @@ help(void)
 	printf("\n\n");
 	printf("Example:\n");
 	printf("9tcfg MAPROM ON LOADROM=ks3.9.rom MOREMEM PCMCIA ON REBOOT\n");
+	printf("Type 9tcfg without args to view status.\n");
 	printf("\n");
 
 }
