@@ -67,7 +67,7 @@ status_display(void)
 	r2 = cfgreg_read(CFG_R2_OFFSET);
 
 	printf("\tNinetails revision:\t\t\t%d\n", hwrev);
-	printf(" ==================== CPU / Memory options ==================== \n");
+	printf(" ================== CPU / Memory options ================== \n");
 
 	printf("\tEnable MC68000 mode (reset):\t\t");
 	status_print_reg(r0, CFG_R0_68KMODE);
@@ -81,7 +81,7 @@ status_display(void)
 	printf("\tMC68EC020 instruction cache:\t\t");
 	status_print_reg_inv(r1, CFG_R1_INSTCACHEOFF);
 	
-	printf(" ========================= ROM options ======================== \n");
+	printf(" ======================= ROM options ====================== \n");
 
 	printf("\tMAPROM at next reset:\t\t\t");
 	status_print_reg(r1, CFG_R1_MAPROM);
@@ -100,12 +100,12 @@ help(void)
 	printf("9tcfg     - Ninetails accelerator config tool by R. Kujawa\n\n");
 	printf("Possible ARGS:\n");
 	printf("M68K      - MC68000 mode - turn off accelerator (ON/OFF)\n");
-	printf("PCMCIA    - Sacrifice 4MB of Fast RAM for PCMCIA sake (ON/OFF)\n");
+	printf("PCMCIA    - Sacrifice 4MB FastRAM for PCMCIA sake (ON/OFF)\n");
 	printf("SHADOWROM - Kickstart shadowing (ON/OFF)\n");
 	printf("MAPROM    - Enable MAPROM, use with LOADROM (ON/OFF)\n");
-	printf("LOADROM   - Load kickstart file to reserved RAM (up to 1MB supported)\n");
-	printf("MOREMEM   - Add more memory to system pool (A80000-B7FFFF, F00000-F7FFFF)\n");
-	printf("INSTCACHE - Instruction cache enable/disable for MC68EC020 (ON/OFF)\n");
+	printf("LOADROM   - Load kickstart file to reserved RAM (up to 1MB))\n");
+	printf("MOREMEM   - 1.5MB more (A80000-B7FFFF, F00000-F7FFFF)\n");
+	printf("INSTCACHE - Instruction cache (ON/OFF)\n");
 	printf("REBOOT    - Die and rise from ashes \n");
 	printf("DEBUG     - Display informations useful only for developers\n");
 	printf("\n\n");
