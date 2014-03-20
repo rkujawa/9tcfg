@@ -99,21 +99,21 @@ help(void)
 	printf("\n");
 	printf("9tcfg     - Ninetails accelerator config tool by R. Kujawa\n\n");
 	printf("Possible ARGS:\n");
+	printf("HELP      - this help\n");
 	printf("M68K      - MC68000 mode - turn off accelerator (ON/OFF)\n");
-	printf("PCMCIA    - Sacrifice 4MB FastRAM for PCMCIA sake (ON/OFF)\n");
-	printf("SHADOWROM - Kickstart shadowing (ON/OFF)\n");
-	printf("MAPROM    - Enable MAPROM, use with LOADROM (ON/OFF)\n");
-	printf("LOADROM   - Load kickstart file to reserved RAM (up to 1MB))\n");
+	printf("PCMCIA    - sacrifice 4MB FastRAM for PCMCIA sake (ON/OFF)\n");
+	printf("SHADOWROM - kickstart shadowing (ON/OFF)\n");
+	printf("MAPROM    - enable MAPROM, use with LOADROM (ON/OFF)\n");
+	printf("LOADROM   - load kickstart file to reserved RAM (up to 1MB)\n");
 	printf("MOREMEM   - 1.5MB more (A80000-B7FFFF, F00000-F7FFFF)\n");
-	printf("INSTCACHE - Instruction cache (ON/OFF)\n");
-	printf("REBOOT    - Die and rise from ashes \n");
-	printf("DEBUG     - Display informations useful only for developers\n");
-	printf("\n\n");
+	printf("INSTCACHE - instruction cache (ON/OFF)\n");
+	printf("REBOOT    - die and rise from ashes \n");
+	printf("DEBUG     - display informations useful only for developers\n");
+	printf("\n");
 	printf("Example:\n");
 	printf("9tcfg MAPROM ON LOADROM=ks3.9.rom MOREMEM PCMCIA ON REBOOT\n");
 	printf("Type 9tcfg without args to view status.\n");
 	printf("\n");
-
 }
 
 BOOL
