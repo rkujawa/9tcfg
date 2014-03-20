@@ -67,7 +67,7 @@ status_display(void)
 	r2 = cfgreg_read(CFG_R2_OFFSET);
 
 	printf("\tNinetails revision:\t\t\t%d\n", hwrev);
-	printf(" ==================== CPU / Memory options ==================== \n");
+	printf(" ================== CPU / Memory options ================== \n");
 
 	printf("\tEnable MC68000 mode (reset):\t\t");
 	status_print_reg(r0, CFG_R0_68KMODE);
@@ -81,7 +81,7 @@ status_display(void)
 	printf("\tMC68EC020 instruction cache:\t\t");
 	status_print_reg_inv(r1, CFG_R1_INSTCACHEOFF);
 	
-	printf(" ========================= ROM options ======================== \n");
+	printf(" ======================= ROM options ====================== \n");
 
 	printf("\tMAPROM at next reset:\t\t\t");
 	status_print_reg(r1, CFG_R1_MAPROM);
@@ -99,16 +99,17 @@ help(void)
 	printf("\n");
 	printf("9tcfg     - Ninetails accelerator config tool by R. Kujawa\n\n");
 	printf("Possible ARGS:\n");
+	printf("HELP      - this help\n");
 	printf("M68K      - MC68000 mode - turn off accelerator (ON/OFF)\n");
-	printf("PCMCIA    - Sacrifice 4MB of Fast RAM for PCMCIA sake (ON/OFF)\n");
-	printf("SHADOWROM - Kickstart shadowing (ON/OFF)\n");
-	printf("MAPROM    - Enable MAPROM, use with LOADROM (ON/OFF)\n");
-	printf("LOADROM   - Load kickstart file to reserved RAM (up to 1MB supported)\n");
-	printf("MOREMEM   - Add more memory to system pool (A80000-B7FFFF, F00000-F7FFFF)\n");
-	printf("INSTCACHE - Instruction cache enable/disable for MC68EC020 (ON/OFF)\n");
-	printf("REBOOT    - Die and rise from ashes \n");
-	printf("DEBUG     - Display informations useful only for developers\n");
-	printf("\n\n");
+	printf("PCMCIA    - sacrifice 4MB FastRAM for PCMCIA sake (ON/OFF)\n");
+	printf("SHADOWROM - kickstart shadowing (ON/OFF)\n");
+	printf("MAPROM    - enable MAPROM, use with LOADROM (ON/OFF)\n");
+	printf("LOADROM   - load kickstart file to reserved RAM (up to 1MB)\n");
+	printf("MOREMEM   - 1.5MB more (A80000-B7FFFF, F00000-F7FFFF)\n");
+	printf("INSTCACHE - instruction cache (ON/OFF)\n");
+	printf("REBOOT    - die and rise from ashes \n");
+	printf("DEBUG     - display informations useful only for developers\n");
+	printf("\n");
 	printf("Example:\n");
 	printf("9tcfg MAPROM ON LOADROM=ks3.9.rom MOREMEM PCMCIA ON REBOOT\n");
 	printf("Type 9tcfg without args to view status.\n");
@@ -330,4 +331,3 @@ reboot(void)
 	/* for now let's just call Exec's ColdReboot()... */
 	ColdReboot();
 }
-
