@@ -330,4 +330,3 @@ reboot(void)
 	/* for now let's just call Exec's ColdReboot()... */
 	ColdReboot();
 }
-
