@@ -68,7 +68,7 @@ file_load(BYTE *path, BYTE *filebuf, ULONG filesize)
 
 	if ((fh = Open(path, MODE_OLDFILE)) == -1)  {	
 		perror("Error openinig file");
-		return 0;
+		return FALSE;
 	}
 
 	if (debug)
@@ -78,11 +78,11 @@ file_load(BYTE *path, BYTE *filebuf, ULONG filesize)
 		perror("Error reading file");
 
 		Close(fh);
-		return 0;
+		return FALSE;
 	}
 
 	Close(fh);
 
-	return 1;
+	return TRUE;
 }
 
