@@ -10,6 +10,8 @@
 
 #include "file.h"
 
+#define EXIT_DOS_ERROR 30
+
 extern BOOL debug;
 
 /* get file size */
@@ -24,7 +26,7 @@ file_size(BYTE *path)
 	dosBase = OpenLibrary("dos.library", 39L);
 	if (!dosBase) {
 		printf("Error opening dos.library!\n");
-		exit(20);
+		exit(EXIT_DOS_ERROR);
 	}
 
 	fib = (struct FileInfoBlock *) AllocDosObject(DOS_FIB, TAG_END);
@@ -32,7 +34,7 @@ file_size(BYTE *path)
 		printf("Couldn't allocate dos object!\n");
 
 		CloseLibrary(dosBase);
-		exit(20);
+		exit(EXIT_DOS_ERROR);
 	}
 
 	if (file = Lock(path, SHARED_LOCK)) {
@@ -51,7 +53,7 @@ file_size(BYTE *path)
 
 		FreeDosObject(DOS_FIB, fib);
 		CloseLibrary(dosBase);
-		exit(20);
+		exit(EXIT_DOS_ERROR);
 	}
 
 	FreeDosObject(DOS_FIB, fib);
