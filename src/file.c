@@ -21,11 +21,11 @@ file_size(BYTE *path)
 	BPTR file;
 	LONG size;
 	struct FileInfoBlock *fib;
-	struct Library *dosBase;
+	struct Library *DOSBase
 
 	/* XXX: possibly explicitly opening dos.library here is unnecessary */
-	dosBase = OpenLibrary("dos.library", 36L);
-	if (!dosBase) {
+	DOSBase = OpenLibrary("dos.library", 36L);
+	if (!DOSBase) {
 		printf("Error opening dos.library!\n");
 		exit(EXIT_DOS_ERROR);
 	}
@@ -34,7 +34,7 @@ file_size(BYTE *path)
 	if (!fib) {
 		printf("Couldn't allocate dos object!\n");
 
-		CloseLibrary(dosBase);
+		CloseLibrary(DOSBase);
 		exit(EXIT_DOS_ERROR);
 	}
 
@@ -53,12 +53,12 @@ file_size(BYTE *path)
 		printf("Couldn't lock file!\n");
 
 		FreeDosObject(DOS_FIB, fib);
-		CloseLibrary(dosBase);
+		CloseLibrary(DOSBase);
 		exit(EXIT_DOS_ERROR);
 	}
 
 	FreeDosObject(DOS_FIB, fib);
-	CloseLibrary(dosBase);
+	CloseLibrary(DOSBase);
 	
 	return size;
 }
