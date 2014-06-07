@@ -10,13 +10,14 @@
 
 #include "file.h"
 
-extern debug;
+extern BOOL debug;
 
 /* get file size */
 ULONG
 file_size(BYTE *path)
 { 
 	BPTR file;
+	LONG size;
 	struct FileInfoBlock *fib;
 	struct Library *dosBase;
 
@@ -29,6 +30,7 @@ file_size(BYTE *path)
 	fib = (struct FileInfoBlock *) AllocDosObject(DOS_FIB, TAG_END);
 	if (!fib) {
 		printf("Couldn't allocate dos object!\n");
+
 		CloseLibrary(dosBase);
 		exit(20);
 	}
@@ -36,8 +38,9 @@ file_size(BYTE *path)
 	if (file = Lock(path, SHARED_LOCK)) {
 
 		if (Examine(file, fib)) {
+			size = fib->fib_Size;
 			if (debug)
-				printf("DEBUG: Examine() returns file size %lx\n", fib->fib_Size);
+				printf("DEBUG: Examine() returns file size %lx\n", size);
 		} else {
 			printf("Couldn't Examine() file!\n"); /* XXX */
 		}
@@ -45,13 +48,16 @@ file_size(BYTE *path)
 		UnLock(file);
 	} else {
 		printf("Couldn't lock file!\n");
+
+		FreeDosObject(DOS_FIB, fib);
+		CloseLibrary(dosBase);
 		exit(20);
 	}
 
 	FreeDosObject(DOS_FIB, fib);
 	CloseLibrary(dosBase);
 	
-	return fib->fib_Size;
+	return size;
 }
 
 /* load file to memory buffer */
@@ -70,6 +76,8 @@ file_load(BYTE *path, BYTE *filebuf, ULONG filesize)
 
 	if (Read(fh, filebuf, filesize) == -1) {
 		perror("Error reading file");
+
+		Close(fh);
 		return 0;
 	}
 
