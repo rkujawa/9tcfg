@@ -21,7 +21,7 @@ file_size(BYTE *path)
 	BPTR file;
 	LONG size;
 	struct FileInfoBlock *fib;
-	struct Library *DOSBase
+	struct Library *DOSBase;
 
 	/* XXX: possibly explicitly opening dos.library here is unnecessary */
 	DOSBase = OpenLibrary("dos.library", 36L);
