@@ -9,7 +9,7 @@
 
 #pragma dontwarn 113 
 
-extern debug;
+extern BOOL debug;
 
 /* add 4MB of memory between 0x600000 and 0x9FFFFF */
 void

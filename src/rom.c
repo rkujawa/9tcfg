@@ -6,7 +6,7 @@
 #include "hardware.h"
 #include "file.h"
 
-extern debug;
+extern BOOL debug;
 
 BOOL rom_copy_self(BYTE *rombuf, ULONG romsize);
 

@@ -10,7 +10,7 @@
 
 static UBYTE *cardaddr = CFG_ADDRESS;
 
-extern debug;
+extern BOOL debug;
 
 /* read register at offset */
 UBYTE
