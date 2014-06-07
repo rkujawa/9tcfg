@@ -120,9 +120,9 @@ BOOL
 arg_switch_isempty(UBYTE argNo)
 {
 	if ( ((LONG) argArray[argNo] != 0))
-		return 0;
+		return FALSE;
 
-	return 1;
+	return TRUE;
 }
 
 BOOL
@@ -132,33 +132,33 @@ arg_toggle_val(UBYTE argNo)
 #define TOGGLE_FALSE	0x0
 #define TOGGLE_TRUE	0xFFFFFFFF
 	if ((LONG) argArray[argNo] == TOGGLE_TRUE)
-		return 1;
+		return TRUE;
 	else if ((LONG) argArray[argNo] == TOGGLE_FALSE)
-		return 0;
+		return FALSE;
 /*	else
 		// I wonder if we'll observe one of these, duh. 
 		printf("DEBUG: toggle neither TRUE nor FALSE, this should not happen!\n");
 */
 
-	return 0;
+	return FALSE;
 }
 
 BOOL
 arg_key_isempty(UBYTE argNo)
 {
 	if ((LONG) argArray[argNo] == 0)
-		return 1;
+		return TRUE;
 	else
-		return 0;
+		return FALSE;
 }
 
 BOOL
 arg_toggle_isempty(UBYTE argNo)
 {
 	if ((LONG) argArray[argNo] != TOGGLE_EMPTY)
-		return 0;	
+		return FALSE;	
 	else
-		return 1;
+		return TRUE;
 }
 
 int
