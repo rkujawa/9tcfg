@@ -23,6 +23,7 @@ file_size(BYTE *path)
 	struct FileInfoBlock *fib;
 	struct Library *dosBase;
 
+	/* XXX: possibly explicitly opening dos.library here is unnecessary */
 	dosBase = OpenLibrary("dos.library", 36L);
 	if (!dosBase) {
 		printf("Error opening dos.library!\n");
