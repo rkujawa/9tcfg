@@ -6,6 +6,9 @@
 #include "hardware.h"
 #include "file.h"
 
+#define EXIT_SYNTAX_ERROR	10
+#define EXIT_HARDWARE_ERROR	20 
+
 extern BOOL debug;
 
 BOOL rom_copy_self(BYTE *rombuf, ULONG romsize);
@@ -139,7 +142,7 @@ maprom_disable()
 	cfgreg_unset(CFG_R1_OFFSET, CFG_R1_MAPROM); 
 }
 
-void
+unsigned char
 maprom_enable(BYTE *path)
 {
 	BYTE *rombuf;
@@ -152,17 +155,17 @@ maprom_enable(BYTE *path)
 	/* do some sanity checks first */	
 	if (r1 & CFG_R1_SHADOWROM) {
 		printf("Cannot use MAPROM if Shadow ROM enabled. Please disable Shadow ROM and reboot first!\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 
 	if (r2 & CFG_R2_MAPROM_STATUS) {
 		printf("Cannot load new ROM if MAPROM currently active. Please disable MAPROM and reboot first!\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 
 	if (r2 & CFG_R2_68KMODE_STATUS) {
 		printf("Cannot use MAPROM if running on 68000! Please reenable 68020 and reboot first.\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 
 	if (debug)
@@ -187,6 +190,8 @@ maprom_enable(BYTE *path)
 
 	free(rombuf);
 	printf("Your Amiga should be restarted now...\n");
+	
+	return 0;
 }
 
 BOOL
