@@ -16,6 +16,7 @@
 #include "rom.h"
 #include "cpu.h"
 
+#define EXIT_WARNING		5
 #define EXIT_SYNTAX_ERROR	10
 #define EXIT_HARDWARE_ERROR	20 
 
@@ -28,8 +29,8 @@ void status_print_reg_inv(UBYTE reg, UBYTE bit);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 1.1 (11.06.2014)\0";
-static const STRPTR id = "\0$Id$\0";
+static const STRPTR version = "\0$VER: 9tcfg 1.2 (23.08.2014)\0";
+static const STRPTR id = "\0$Id: 0bd186d77dd243a27c26267de8870027047f7101 $\0";
 
 static LONG *argArray;	/* arguments passed on the command line */
 
@@ -168,6 +169,9 @@ main(int argc, char *argv[])
 	 * AmigaOS ReadArgs-style argument parsing is an inconsistent shit.
 	 * Pile of shit. Period.
 	 */
+	UBYTE returnCode = 0;
+	UBYTE returnCode_EXIT = 0;
+	
 	struct RDArgs *result;
 	CONST_STRPTR argTemplate =
 	    "M68K/T,PCMCIA/T,MAPROM/T,SHADOWROM/T,LOADROM/K,MOREMEM/S,INSTCACHE/T,REBOOT/S,DEBUG/S,HELP/S";
@@ -247,25 +251,8 @@ main(int argc, char *argv[])
 		}	
 	}
 
-	/* MAPROM ON only if LOADROM passed. */
-	if (!arg_toggle_isempty(MAPROM_ARG)) {
-		if (arg_toggle_val(MAPROM_ARG)) 
-			if (arg_key_isempty(LOADROM_ARG))
-				printf("MAPROM ON must be used with LOADROM!\n");
-			else 
-				maprom_enable((STRPTR) argArray[LOADROM_ARG]);
-		else
-			maprom_disable();
-	}
-
-	if (!arg_toggle_isempty(SHADOWROM_ARG)) {
-		if (arg_toggle_val(SHADOWROM_ARG)) 
-			shadowrom_enable();
-		else
-			shadowrom_disable();
-	}
-
-	if (!arg_switch_isempty(MOREMEM_ARG))
+	
+		if (!arg_switch_isempty(MOREMEM_ARG))
 	{
 /*
 		printf("DEBUG: MOREMEM arugment passed\n");
@@ -273,6 +260,44 @@ main(int argc, char *argv[])
 		/* only if not running in 68000 mode */	
 		memory_add_misc();
 	}
+	
+	/* MAPROM ON only if LOADROM passed. */
+	if (!arg_toggle_isempty(MAPROM_ARG)) {
+		if (arg_toggle_val(MAPROM_ARG)) 
+			if (arg_key_isempty(LOADROM_ARG)){
+				printf("MAPROM ON must be used with LOADROM!\n");
+				return EXIT_SYNTAX_ERROR;
+				}
+			else {
+				returnCode = maprom_enable((STRPTR) argArray[LOADROM_ARG]);
+				if ( returnCode > 5 ){
+					cfgreg_lock();
+					return returnCode;
+					}
+				else{
+					if(returnCode > returnCode_EXIT) returnCode_EXIT = returnCode;
+				}
+				
+			}
+		else
+			maprom_disable();
+	}
+
+	if (!arg_toggle_isempty(SHADOWROM_ARG)) {
+		if (arg_toggle_val(SHADOWROM_ARG)) {
+			returnCode = shadowrom_enable();
+			if( returnCode > 5 ){
+				cfgreg_lock();
+				return returnCode;
+				}
+			else{
+				if(returnCode > returnCode_EXIT) returnCode_EXIT = returnCode;
+			}
+		}
+		else
+			shadowrom_disable();
+	}
+
 
 	if (!arg_toggle_isempty(MODE68K_ARG)) {
 		if (arg_toggle_val(MODE68K_ARG)) 
@@ -301,8 +326,9 @@ main(int argc, char *argv[])
 		else
 			instcache_disable();
 	}
-
-	if (!arg_switch_isempty(REBOOT_ARG)) {
+	
+	
+	if (!arg_switch_isempty(REBOOT_ARG) & (returnCode_EXIT == 0)) {
 		reboot();
 	}
 
@@ -317,7 +343,7 @@ main(int argc, char *argv[])
 	FreeArgs(result);
 	FreeVec(argArray);
 
-	return 0;
+	return returnCode_EXIT;
 }
 
 /* reboot the machine */
