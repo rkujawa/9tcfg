@@ -6,6 +6,9 @@
 #include "hardware.h"
 #include "file.h"
 
+#define EXIT_SYNTAX_ERROR	10
+#define EXIT_HARDWARE_ERROR	20 
+
 extern BOOL debug;
 
 BOOL rom_copy_self(BYTE *rombuf, ULONG romsize);
@@ -17,7 +20,7 @@ shadowrom_disable(void)
 }
 
 /* copy rom over itself */
-void
+UBYTE
 shadowrom_enable(void)
 {
 	
@@ -28,17 +31,17 @@ shadowrom_enable(void)
 
 	if (r2 & CFG_R2_68KMODE_STATUS) {
 		printf("Cannot use SHADOWROM if running on 68000! Please reenable 68020 and reboot first.\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 
 	if ( (r1 & CFG_R1_MAPROM) || (r2 & CFG_R2_MAPROM_STATUS)) {
 		printf("Cannot enable Shadow ROM if MAPROM enabled or currently active!\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 	
 	if (r1 & CFG_R1_SHADOWROM) {
 		printf("SHADOWROM is already active!\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 
 /*	cfgreg_set(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF);  */
@@ -47,7 +50,9 @@ shadowrom_enable(void)
 	memcpy((void*) 0xF80000, (void*) 0xF80000, 512*1024);	
 
 /*	cfgreg_unset(CFG_R0_OFFSET, CFG_R0_WRITELOCKOFF);  */
-	cfgreg_set(CFG_R1_OFFSET, CFG_R1_SHADOWROM); 
+	cfgreg_set(CFG_R1_OFFSET, CFG_R1_SHADOWROM);
+	
+	return 0;
 }
 
 /*
@@ -139,7 +144,7 @@ maprom_disable()
 	cfgreg_unset(CFG_R1_OFFSET, CFG_R1_MAPROM); 
 }
 
-void
+UBYTE
 maprom_enable(BYTE *path)
 {
 	BYTE *rombuf;
@@ -152,17 +157,17 @@ maprom_enable(BYTE *path)
 	/* do some sanity checks first */	
 	if (r1 & CFG_R1_SHADOWROM) {
 		printf("Cannot use MAPROM if Shadow ROM enabled. Please disable Shadow ROM and reboot first!\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 
 	if (r2 & CFG_R2_MAPROM_STATUS) {
 		printf("Cannot load new ROM if MAPROM currently active. Please disable MAPROM and reboot first!\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 
 	if (r2 & CFG_R2_68KMODE_STATUS) {
 		printf("Cannot use MAPROM if running on 68000! Please reenable 68020 and reboot first.\n");
-		return;
+		return EXIT_SYNTAX_ERROR;
 	}
 
 	if (debug)
@@ -187,6 +192,8 @@ maprom_enable(BYTE *path)
 
 	free(rombuf);
 	printf("Your Amiga should be restarted now...\n");
+	
+	return 0;
 }
 
 BOOL
