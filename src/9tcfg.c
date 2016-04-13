@@ -28,8 +28,8 @@ void status_print_reg_inv(UBYTE reg, UBYTE bit);
 
 /* -- global variables -- */
 
-static const STRPTR version = "\0$VER: 9tcfg 1.1 (11.06.2014)\0";
-static const STRPTR id = "\0$Id$\0";
+static const STRPTR version = "\0$VER: 9tcfg 1.0 (23.03.2014)\0";
+static const STRPTR id = "\0$Id: 0bd186d77dd243a27c26267de8870027047f7101 $\0";
 
 static LONG *argArray;	/* arguments passed on the command line */
 
@@ -250,10 +250,16 @@ main(int argc, char *argv[])
 	/* MAPROM ON only if LOADROM passed. */
 	if (!arg_toggle_isempty(MAPROM_ARG)) {
 		if (arg_toggle_val(MAPROM_ARG)) 
-			if (arg_key_isempty(LOADROM_ARG))
+			if (arg_key_isempty(LOADROM_ARG)){
 				printf("MAPROM ON must be used with LOADROM!\n");
-			else 
-				maprom_enable((STRPTR) argArray[LOADROM_ARG]);
+				return EXIT_SYNTAX_ERROR;
+				}
+			else {
+				if ( maprom_enable((STRPTR) argArray[LOADROM_ARG]) ){
+					cfgreg_lock();
+					return EXIT_SYNTAX_ERROR;
+					}
+				}
 		else
 			maprom_disable();
 	}
